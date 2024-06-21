@@ -1,3 +1,5 @@
+![Unseen](img/Unseen-banner.png)
+
 ## UNSEEN VESTING PROTOCOL FORKED AND CUSTOMIZED FROM 
 > https://github.com/sablier-labs/v2-core
 
