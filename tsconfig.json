@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "module": "commonjs",
+    "strict": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "outDir": "dist",
+    "declaration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@artifacts": ["artifacts/*"],
+      "@constants": ["constants/index"],
+      "@deploy": ["deploy/*"],
+      "@deployments": ["deployments/*"],
+      "@typechained": ["typechained/index"],
+      "@utils": ["test/utils/index"],
+      "@utils/*": ["test/utils/*"],
+      "@fixtures": ["test/utils/fixtures/index"],
+      "@fixtures/*": ["test/utils/fixtures/*"],
+      "@unit/*": ["test/unit/*"],
+      "@openzeppelin": ["node_modules/@openzeppelin"],
+      "@openzeppelin-4.9.6": ["node_modules/@openzeppelin-4.9.6"]
+    }
+  },
+  "include": [
+    "./scripts",
+    "./deploy",
+    "./test",
+    "./utils",
+    "./eth-sdk",
+    "./*.config.ts",
+    "./eip-712-types",
+    "./typechained",
+    "hardhat.config.ts"
+  ],
+  "files": ["hardhat.config.ts"]
+}

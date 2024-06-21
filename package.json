@@ -1,0 +1,71 @@
+{
+  "name": "@unseen/protocols",
+  "license": "MIT",
+  "version": "1.0.0",
+  "description": "The Unseen - Decentralized Esports Ecosystem Token Vesting",
+  "scripts": {
+    "clean": "hardhat clean; rm -rf coverage coverage.json hh-cache hh-cache-ref",
+    "compile": "hardhat compile",
+    "compile:test": "cross-env TEST=true hardhat compile",
+    "coverage": "hardhat coverage --solcoverjs ./config/.solcover.js",
+    "test:coverage": "hardhat coverage",
+    "test:gas": "cross-env REPORT_GAS=true npx hardhat test",
+    "test": "yarn compile:test && cross-env TEST=true mocha",
+    "deploy": "hardhat deploy",
+    "lint": "solhint 'contracts/*.sol'",
+    "lint:fix": "solhint 'contracts/**/*.sol' --fix",
+    "format:sol": "prettier --plugin=prettier-plugin-solidity '**/*.sol' --write; solhint --config ./config/.solhint.json --ignore-path ./config/.solhintignore 'contracts/**/*.sol' --fix;",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.9",
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomiclabs/hardhat-ethers": "^2.1.1",
+    "@nomiclabs/hardhat-etherscan": "^3.1.0",
+    "@typechain/ethers-v5": "^10.1.0",
+    "@typechain/hardhat": "^6.1.3",
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.6",
+    "chai": "^4.3.10",
+    "ethers": "^5.7.1",
+    "hardhat": "^2.22.3",
+    "hardhat-gas-reporter": "^2.1.1",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.24",
+    "solhint": "^3.3.7",
+    "solhint-plugin-prettier": "^0.0.5",
+    "solidity-coverage": "^0.8.12",
+    "ts-node": "^10.9.2",
+    "typechain": "^8.3.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@axelar-network/interchain-token-service": "^1.2.4",
+    "@openzeppelin-4.9.6/contracts": "npm:@openzeppelin/contracts@4.9.6",
+    "@openzeppelin/contracts": "5.0.1",
+    "@prb/math": "^4.0.2",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.0.3",
+    "erc721a": "^4.3.0",
+    "hardhat-deploy": "^0.12.4",
+    "hardhat-preprocessor": "^0.1.5",
+    "merkletreejs": "^0.3.11",
+    "solady": "^0.0.201",
+    "tsconfig-paths": "^4.2.0"
+  },
+  "lint-staged": {
+    "*.{js,json,yml,yaml}": [
+      "prettier --write"
+    ],
+    "*.sol": [
+      "prettier --write",
+      "solhint"
+    ]
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

@@ -1,0 +1,28 @@
+{
+  "semi": true,
+  "arrowParens": "always",
+  "bracketSpacing": true,
+  "endOfLine":"auto",
+  "bracketSameLine": false,
+  "printWidth": 80,
+  "useTabs": false,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "quoteProps": "as-needed",
+  "trailingComma": "es5",
+  "overrides": [
+    {
+      "files": "**.sol",
+      "options": {
+        "semi": true,
+        "tabWidth": 4,
+        "singleQuote": false,
+        "trailingComma": "none",
+        "bracketSpacing": true,
+        "arrowParens": "avoid",
+        "printWidth": 80,
+        "useTabs": false
+      }
+    }
+  ]
+}
