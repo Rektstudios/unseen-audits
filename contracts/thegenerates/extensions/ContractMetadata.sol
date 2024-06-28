@@ -7,7 +7,7 @@ import { MarketsPreapproved, ERC721A, IERC721A } from "../abstract/MarketsPreapp
 
 import { ICreatorToken } from "../interfaces/ICreatorToken.sol";
 
-import { ITransferValidator721 } from "../interfaces/ITransferValidator.sol";
+import { ITransferValidator } from "../interfaces/ITransferValidator.sol";
 
 import { TokenTransferValidator } from "../abstract/TokenTransferValidator.sol";
 
@@ -291,7 +291,7 @@ contract ContractMetadata is
         pure
         returns (bytes4 functionSignature, bool isViewFunction)
     {
-        functionSignature = ITransferValidator721.validateTransfer.selector;
+        functionSignature = ITransferValidator.validateTransfer.selector;
         isViewFunction = false;
     }
 
@@ -317,7 +317,7 @@ contract ContractMetadata is
             // Call the transfer validator if one is set.
             address transferValidator = _transferValidator;
             if (transferValidator != address(0)) {
-                ITransferValidator721(transferValidator).validateTransfer(
+                ITransferValidator(transferValidator).validateTransfer(
                     msg.sender,
                     from,
                     to,
