@@ -5,6 +5,7 @@ import { parseEther } from 'ethers/lib/utils';
 import { ethers, network } from 'hardhat';
 
 import type {
+  MockDelegateCaller,
   MockERC20,
   UnseenVesting,
   UnseenVestingNFTDescriptor,
@@ -17,6 +18,7 @@ import { randomHex } from '@utils/encoding';
 import { faucet } from '@utils/faucet';
 import { unseenFixture } from '@utils/fixtures';
 import { deployContract } from '@utils/helpers';
+import { deployContract as deploy } from '@utils/contracts';
 import { clock, duration, increaseTo } from '@utils/time';
 
 const { AddressZero } = ethers.constants;
@@ -25,11 +27,12 @@ describe(`Vesting - (Unseen v${process.env.VERSION})`, async function () {
   const { provider } = ethers;
 
   let mockERC20: MockERC20;
+  let delegateCaller: MockDelegateCaller;
   let unseenVesting: UnseenVesting;
   let vestingNFTDescriptor: UnseenVestingNFTDescriptor;
   let schedules: ScheduleParams[];
   let mockSchedule: ScheduleParams;
-  let mint20: UnseenFixtures['mint20'];
+  let mintAndApproveERC20: UnseenFixtures['mintAndApproveERC20'];
   let createMultiSchedules: UnseenFixtures['createMultiSchedules'];
   let createSchedule: UnseenFixtures['createSchedule'];
 
@@ -68,7 +71,7 @@ describe(`Vesting - (Unseen v${process.env.VERSION})`, async function () {
   beforeEach(async function () {
     ({
       mockERC20,
-      mint20,
+      mintAndApproveERC20,
       unseenVesting,
       vestingNFTDescriptor,
       schedules,
@@ -89,7 +92,7 @@ describe(`Vesting - (Unseen v${process.env.VERSION})`, async function () {
         {
           amount: parseEther('50000000'),
           exponent: parseEther('1'),
-          milestone: timestamp.add(duration.hours(1).add(duration.seconds(1))),
+          milestone: timestamp.add(duration.seconds(3601)),
         },
         {
           amount: parseEther('50000000'),
@@ -101,15 +104,15 @@ describe(`Vesting - (Unseen v${process.env.VERSION})`, async function () {
 
     amount = parseEther('1000000000');
 
-    await mint20(owner, amount);
-
-    expect(await mockERC20.balanceOf(owner.address)).to.eq(amount);
+    delegateCaller = await deploy('MockDelegateCaller', owner);
 
     /**
      * @note an equal amount of tokens should be approved to be spent
      *       by unseenVesting earlier to schedules creation
      */
-    await mockERC20.connect(owner).approve(unseenVesting.address, amount);
+    await mintAndApproveERC20(owner, unseenVesting.address, amount);
+
+    expect(await mockERC20.balanceOf(owner.address)).to.eq(amount);
 
     expect(
       await mockERC20.allowance(owner.address, unseenVesting.address)
@@ -467,40 +470,260 @@ describe(`Vesting - (Unseen v${process.env.VERSION})`, async function () {
         amount.sub(withdtawableAmount)
       );
     });
-  });
+    it('owner can create a schedule with 1 segment', async function () {
+      const totalAmount = parseEther('50000000');
+      const initialStartTime = await clock.timestamp();
+      const segmentDuration = BigNumber.from(10000);
+      const checkTime = BigNumber.from(8000);
 
-  context('get functions', async function () {
-    it('schedules has correct params', async function () {
-      await unseenVesting.createSchedule(schedules[0]);
+      mockSchedule.startTime = initialStartTime;
+      mockSchedule.totalAmount = totalAmount;
+      mockSchedule.segments = [
+        {
+          amount: totalAmount,
+          exponent: parseEther('1'),
+          milestone: initialStartTime.add(segmentDuration),
+        },
+      ];
 
-      expect(await unseenVesting.getDepositedAmount(1)).to.eq(
-        schedules[0].totalAmount
+      await createSchedule({ schedule: mockSchedule });
+
+      await increaseTo.timestamp(initialStartTime.add(checkTime));
+
+      const vestedAmount = await unseenVesting.vestedAmountOf(1);
+      const expectedVestedAmount = totalAmount
+        .mul(checkTime)
+        .div(segmentDuration);
+
+      expect(vestedAmount.toString()).to.equal(expectedVestedAmount.toString());
+    });
+    it('no delegate call when creating schedules', async function () {
+      const data = unseenVesting.interface.encodeFunctionData(
+        'createSchedule',
+        [schedules[0]]
       );
 
-      expect(await unseenVesting.getRefundedAmount(1)).to.eq(0);
-
-      expect(await unseenVesting.getEndTime(1)).to.eq(
-        schedules[0].segments[3].milestone
-      );
-
-      expect(await unseenVesting.getRange(1)).to.deep.eq([
-        schedules[0].startTime,
-        schedules[0].segments[3].milestone,
+      await expect(
+        delegateCaller.delegateCall(unseenVesting.address, data)
+      ).to.be.revertedWithCustomError(unseenVesting, 'DelegateCall');
+    });
+    it('no delegate call when withdrawing', async function () {
+      await unseenVesting.createSchedule(mockSchedule);
+      const data = unseenVesting.interface.encodeFunctionData('withdraw', [
+        1,
+        mockSchedule.recipient,
+        10,
       ]);
 
-      expect(await unseenVesting.getSender(1)).to.eq(owner.address);
-
-      expect(await unseenVesting.getStartTime(1)).to.eq(schedules[0].startTime);
-
-      expect(await unseenVesting.isCancelable(1)).to.eq(true);
-
-      expect(await unseenVesting.isTransferable(1)).to.eq(true);
-
-      expect(await unseenVesting.isSchedule(1)).to.eq(true);
-
-      expect(await unseenVesting.isSchedule(2)).to.eq(false);
+      await expect(
+        delegateCaller.delegateCall(unseenVesting.address, data)
+      ).to.be.revertedWithCustomError(unseenVesting, 'DelegateCall');
     });
-    it("schedule's status is properly managed", async function () {
+    it('cannot withdraw more then withdrawableAmount', async function () {
+      await unseenVesting.createSchedule(mockSchedule);
+
+      await increaseTo.timestamp(Number(mockSchedule.segments[0].milestone));
+
+      const withdtawableAmount = await unseenVesting.withdrawableAmountOf(1);
+
+      await expect(
+        unseenVesting.withdraw(
+          1,
+          mockSchedule.recipient,
+          withdtawableAmount.mul(2)
+        )
+      ).to.be.revertedWithCustomError(unseenVesting, 'Overdraw');
+    });
+    it('only recipient should be able to withdraw max available and transfer the nft to new receipient', async function () {
+      await unseenVesting.createSchedule(mockSchedule);
+
+      await increaseTo.timestamp(Number(mockSchedule.segments[0].milestone));
+      await expect(unseenVesting.withdrawMaxAndTransfer(1, alice.address))
+        .to.be.revertedWithCustomError(unseenVesting, 'Vesting_Unauthorized')
+        .withArgs(1, owner.address);
+
+      await unseenVesting.connect(bob).withdrawMaxAndTransfer(1, alice.address);
+
+      expect(await unseenVesting.ownerOf(1)).to.eq(alice.address);
+    });
+    it('should be able to withdraw from multiple schedules', async function () {
+      await unseenVesting.createMultiSchedules([mockSchedule, mockSchedule]);
+
+      await increaseTo.timestamp(Number(mockSchedule.segments[0].milestone));
+
+      const scheduleOneWithdrawableAmount =
+        await unseenVesting.withdrawableAmountOf(1);
+      const scheduleTwoWithdrawableAmount =
+        await unseenVesting.withdrawableAmountOf(2);
+      await expect(
+        unseenVesting
+          .connect(alice)
+          .withdrawMultiple([1, 2], mockSchedule.recipient, [
+            scheduleOneWithdrawableAmount,
+            scheduleTwoWithdrawableAmount,
+          ])
+      ).to.be.revertedWithCustomError(unseenVesting, 'Vesting_Unauthorized');
+
+      await expect(
+        unseenVesting.withdrawMultiple([1, 2], mockSchedule.recipient, [
+          scheduleOneWithdrawableAmount,
+        ])
+      ).to.be.revertedWithCustomError(
+        unseenVesting,
+        'WithdrawArrayCountsNotEqual'
+      );
+
+      await expect(
+        unseenVesting.withdrawMultiple([1], mockSchedule.recipient, [
+          scheduleOneWithdrawableAmount,
+          scheduleTwoWithdrawableAmount,
+        ])
+      ).to.be.revertedWithCustomError(
+        unseenVesting,
+        'WithdrawArrayCountsNotEqual'
+      );
+
+      await unseenVesting.withdrawMultiple([1, 2], mockSchedule.recipient, [
+        scheduleOneWithdrawableAmount,
+        scheduleTwoWithdrawableAmount,
+      ]);
+
+      expect(await mockERC20.balanceOf(mockSchedule.recipient)).to.eq(
+        scheduleOneWithdrawableAmount.add(scheduleTwoWithdrawableAmount)
+      );
+    });
+  });
+
+  context('access by invalid indices', function () {
+    it('should revert with Null error on invalid index access', async function () {
+      const invalidScheduleIndex = 0;
+      await createSchedule({ schedule: schedules[0] });
+      await Promise.all([
+        expect(unseenVesting.statusOf(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.getDepositedAmount(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.getRefundedAmount(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.getSegments(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.getEndTime(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.getRange(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.getSender(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.getStartTime(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.getSchedule(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.getWithdrawnAmount(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.isCancelable(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.isTransferable(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(await unseenVesting.isSchedule(invalidScheduleIndex)).to.eq(
+          false
+        ),
+        expect(unseenVesting.refundableAmountOf(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.vestedAmountOf(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.isDepleted(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.wasCanceled(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.isCold(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        expect(unseenVesting.isWarm(invalidScheduleIndex))
+          .to.be.revertedWithCustomError(unseenVesting, 'Null')
+          .withArgs(invalidScheduleIndex),
+        // ERC721: invalid token ID
+        expect(unseenVesting.tokenURI(invalidScheduleIndex)).to.be.reverted,
+        expect(unseenVesting.getRecipient(invalidScheduleIndex)).to.be.reverted,
+      ]);
+    });
+  });
+
+  context('deposit, refund, and segments checks', function () {
+    it('checks the deposited and refunded amounts', async function () {
+      const totalAmount = parseEther('100000000');
+      const endTime = 10000000000;
+      schedules[0].segments = [
+        {
+          amount: totalAmount,
+          exponent: parseEther('1'),
+          milestone: endTime,
+        },
+      ];
+      await createSchedule({ schedule: schedules[0] });
+      const validScheduleIndex = 1;
+
+      expect(await unseenVesting.getDepositedAmount(validScheduleIndex)).to.eq(
+        schedules[0].totalAmount
+      );
+      expect(await unseenVesting.getRefundedAmount(validScheduleIndex)).to.eq(
+        0
+      );
+
+      await unseenVesting.getSegments(validScheduleIndex);
+
+      expect(await unseenVesting.getEndTime(validScheduleIndex)).to.eq(endTime);
+      expect(await unseenVesting.getRange(validScheduleIndex)).to.deep.eq([
+        schedules[0].startTime,
+        endTime,
+      ]);
+      expect(await unseenVesting.getSender(validScheduleIndex)).to.eq(
+        owner.address
+      );
+      expect(await unseenVesting.getStartTime(validScheduleIndex)).to.eq(
+        schedules[0].startTime
+      );
+
+      await unseenVesting.getSchedule(validScheduleIndex);
+
+      expect(await unseenVesting.getWithdrawnAmount(validScheduleIndex)).to.eq(
+        0
+      );
+      expect(await unseenVesting.isCancelable(validScheduleIndex)).to.eq(true);
+      expect(await unseenVesting.isTransferable(validScheduleIndex)).to.eq(
+        true
+      );
+      expect(await unseenVesting.isSchedule(validScheduleIndex)).to.eq(true);
+      expect(await unseenVesting.refundableAmountOf(validScheduleIndex)).to.eq(
+        schedules[0].totalAmount
+      );
+      expect(await unseenVesting.vestedAmountOf(validScheduleIndex)).to.eq(0);
+      expect(await unseenVesting.isDepleted(validScheduleIndex)).to.eq(false);
+      expect(await unseenVesting.isCold(validScheduleIndex)).to.eq(false);
+      expect(await unseenVesting.isWarm(validScheduleIndex)).to.eq(true);
+      expect(await unseenVesting.wasCanceled(validScheduleIndex)).to.eq(false);
+      expect(await unseenVesting.getRecipient(validScheduleIndex)).to.eq(
+        schedules[0].recipient
+      );
+    });
+  });
+
+  context('schedules status management', function () {
+    it("should properly manage the schedule's status", async function () {
       await unseenVesting.createMultiSchedules([
         mockSchedule,
         { ...mockSchedule, recipient: alice.address },
@@ -509,19 +732,15 @@ describe(`Vesting - (Unseen v${process.env.VERSION})`, async function () {
       expect(await unseenVesting.statusOf(1)).to.eq(0);
 
       await increaseTo.timestamp(Number(mockSchedule.segments[0].milestone));
-
       expect(await unseenVesting.statusOf(1)).to.eq(1);
 
       await unseenVesting.cancel(1);
-
       expect(await unseenVesting.statusOf(1)).to.eq(3);
 
       await unseenVesting.connect(bob).withdrawMax(1, bob.address);
-
       expect(await unseenVesting.statusOf(1)).to.eq(4);
 
       await increaseTo.timestamp(Number(mockSchedule.segments[1].milestone));
-
       expect(await unseenVesting.statusOf(2)).to.eq(2);
 
       await unseenVesting.connect(alice).withdrawMax(2, alice.address);
@@ -532,6 +751,8 @@ describe(`Vesting - (Unseen v${process.env.VERSION})`, async function () {
     it('owner creates all schedules', async function () {
       // TODO simulate Unseen schedules with time manipulation
       await createMultiSchedules({ schedules: schedules });
+
+      await unseenVesting.tokenURI(1);
     });
   });
 });

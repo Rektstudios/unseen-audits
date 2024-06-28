@@ -1,5 +1,5 @@
 module.exports = {
-  skipFiles: ['interfaces', './test'],
+  skipFiles: ['interfaces', './test', './shim', './uncn'],
   istanbulReporter: ['html', 'lcov', 'json-summary'],
   mocha: {
     forbidOnly: true,

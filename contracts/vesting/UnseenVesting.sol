@@ -373,8 +373,8 @@ contract UnseenVesting is IUnseenVesting, VestingLockup {
     )
         external
         override
-        onlyOwner
         noDelegateCall
+        onlyOwner
         returns (uint256[] memory scheduleIds)
     {
         // Check that the schedules count is not zero.
@@ -400,7 +400,7 @@ contract UnseenVesting is IUnseenVesting, VestingLockup {
      */
     function createSchedule(
         Lockup.CreateSchedule calldata params
-    ) external override onlyOwner noDelegateCall returns (uint256 scheduleId) {
+    ) external override noDelegateCall onlyOwner returns (uint256 scheduleId) {
         // Checks, Effects and Interactions: create the schedule.
         scheduleId = _createSchedule(params);
     }

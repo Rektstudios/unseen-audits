@@ -81,7 +81,7 @@ contract UnseenVestingNFTDescriptor is IUnseenVestingNFTDescriptor {
         // Generate the SVG.
         vars.svg = NFTSVG.generateSVG(
             NFTSVG.SVGParams({
-                accentColor: generateAccentColor(unseenVesting, scheduleId),
+                accentColor: "#92e603",
                 amount: abbreviateAmount({
                     amount: vars.depositedAmount,
                     decimals: 18
@@ -233,58 +233,6 @@ contract UnseenVestingNFTDescriptor is IUnseenVestingNFTDescriptor {
         // This cannot overflow because both inputs are uint128s, and zero deposit amounts are not allowed in Unseen Vesting.
         unchecked {
             return (vestedAmount * 10_000) / depositedAmount;
-        }
-    }
-
-    /**
-     * @notice Generates a pseudo-random HSL color by hashing together the `chainid`, the `UnseenVesting` address,
-     * and the `scheduleId`. This will be used as the accent color for the SVG.
-     * @param unseenVesting The address of the UnseenVesting contract.
-     * @param scheduleId The ID of the vesting schedule.
-     * @return accentColor The generated HSL color string.
-     */
-    function generateAccentColor(
-        address unseenVesting,
-        uint256 scheduleId
-    ) internal view returns (string memory) {
-        // The chain id is part of the hash so that the generated color is different across chains.
-        uint256 chainId = block.chainid;
-
-        // Hash the parameters to generate a pseudo-random bit field, which will be used as entropy.
-        // | Hue     | Saturation | Lightness | -> Roles
-        // | [31:16] | [15:8]     | [7:0]     | -> Bit positions
-        uint32 bitField = uint32(
-            uint256(
-                keccak256(abi.encodePacked(chainId, unseenVesting, scheduleId))
-            )
-        );
-
-        unchecked {
-            // The hue is a degree on a color wheel, so its range is [0, 360).
-            // Shifting 16 bits to the right means using the bits at positions [31:16].
-            uint256 hue = (bitField >> 16) % 360;
-
-            // The saturation is a percentage where 0% is grayscale and 100%, but here the range is bounded to [20,100]
-            // to make the colors more lively.
-            // Shifting 8 bits to the right and applying an 8-bit mask means using the bits at positions [15:8].
-            uint256 saturation = (((bitField >> 8) & 0xFF) % 80) + 20;
-
-            // The lightness is typically a percentage between 0% (black) and 100% (white), but here the range
-            // is bounded to [30,100] to avoid dark colors.
-            // Applying an 8-bit mask means using the bits at positions [7:0].
-            uint256 lightness = ((bitField & 0xFF) % 70) + 30;
-
-            // Finally, concatenate the HSL values to form an SVG color string.
-            return
-                string.concat(
-                    "hsl(",
-                    hue.toString(),
-                    ",",
-                    saturation.toString(),
-                    "%,",
-                    lightness.toString(),
-                    "%)"
-                );
         }
     }
 
