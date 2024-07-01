@@ -7,7 +7,7 @@
     "clean": "hardhat clean; rm -rf coverage coverage.json hh-cache hh-cache-ref",
     "compile": "hardhat compile",
     "compile:test": "cross-env TEST=true hardhat compile",
-    "coverage": "hardhat coverage --solcoverjs ./config/.solcover.js",
+    "coverage": "rm -rf coverage coverage.json && hardhat coverage --solcoverjs ./config/.solcover.js",
     "test:coverage": "hardhat coverage",
     "test:gas": "cross-env REPORT_GAS=true npx hardhat test",
     "test": "yarn compile:test && cross-env TEST=true mocha",
