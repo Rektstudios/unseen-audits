@@ -21,7 +21,7 @@ $$ |  $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |      \$$$$$$  |  \$$$$  |\$$$$$$  |\$$$
 
 /**
  * @title   FeeCollector
- * @author  decapinator.eth
+ * @author  decapitator (0xdecapitator.eth)
  * @notice  FeeCollector is a contract that inherits the
  *          BaseFeeCollector allowing for native token and ERC20
  *          token withdrawals. In addition, allowing for unwrapping

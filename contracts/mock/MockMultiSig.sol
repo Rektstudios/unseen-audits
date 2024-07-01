@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 
 /**
  *  @title  Mock MultiSigWallet
- *  @author decapinator.eth
+ * @author  decapitator (0xdecapitator.eth)
  *  @notice Mock MultiSigWallet for testing purposes
  *
  */

@@ -213,11 +213,5 @@ contract TGenContract is ContractMetadata {
             ownerOf(tokenId),
             amount
         );
-
-        emit UpdateUser(
-            tokenId,
-            msg.sender,
-            uint64(block.timestamp + expires * 60)
-        );
     }
 }

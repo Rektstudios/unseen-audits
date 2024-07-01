@@ -38,6 +38,11 @@ interface IERC4907A is IERC721A {
     error FeeAlreadySet();
 
     /**
+     * Error indicating no changes were made.
+     */
+    error NoChange();
+
+    /**
      * @dev Emitted when the `user` of an NFT or the `expires` of the `user` is changed.
      * The zero address for user indicates that there is no user address.
      */
@@ -74,12 +79,14 @@ interface IERC4907A is IERC721A {
     function rent(uint256 tokenId, uint64 _expires) external;
 
     /**
-     * @dev Set rental fee for token id per minute.
+     *  @notice Set the rentable status and rent fee of a specific token.
+     *  @param tokenId The tokenId of the token to update.
+     *  @param rentable The rentable status to set for the token.
+     *  @param ratePerMinute The rent fee in UNCN per minute.
      */
-    function setRentFee(uint256 tokenId, uint128 _ratePerMinute) external;
-
-    /**
-     * @dev Set a token id rentable.
-     */
-    function setRentable(uint256 tokenId, bool rentable) external;
+    function setRentablesInfo(
+        uint256 tokenId,
+        bool rentable,
+        uint128 ratePerMinute
+    ) external;
 }

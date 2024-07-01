@@ -324,6 +324,10 @@ contract ContractMetadata is
                     startTokenId
                 );
             }
+            // Restrict transfer if token is rented.
+            if (userOf(startTokenId) != address(0)) {
+                revert Rented();
+            }
         }
     }
 

@@ -8,7 +8,7 @@ interface IERC20 {
 
 /**
  * @title   BaseFeeCollectorInterface
- * @author  decapinator.eth
+ * @author  decapitator (0xdecapitator.eth)
  * @notice  BaseFeeCollectorInterface contains all external function INTERFACES
  *          for the fee collector implementation.
  */

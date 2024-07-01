@@ -46,18 +46,17 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
     }
 
     /**
-     * @dev Sets the `user` and `expires` for `tokenId`.
-     * The zero address indicates there is no user.
+     * @notice Internal function for setting user and expiration details for a token
      *
-     * Requirements:
-     *
-     * - The caller must own `tokenId` or be an approved operator.
+     * @param tokenId The token to set user and expiration details
+     * @param user The address of the user
+     * @param expires The time in minutes until the token expires
      */
-    function setUser(
+    function _setUserAndExpiration(
         uint256 tokenId,
         address user,
         uint64 expires
-    ) public virtual override isAuthorized(tokenId) {
+    ) private {
         if (userOf(tokenId) != address(0)) {
             revert Rented();
         }
@@ -81,58 +80,33 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
         uint256 tokenId,
         uint64 expires
     ) internal virtual returns (uint256 dueAmount) {
-        if (userOf(tokenId) != address(0)) {
-            revert Rented();
-        }
-        if (expires == 0) {
-            revert NoExpiryAssigned();
-        }
         if (!rentablesInfo[tokenId].rentable) {
             revert RentingDisabled();
         }
         dueAmount = rentablesInfo[tokenId].ratePerMinute * expires;
-        _packedUserInfo[tokenId] =
-            (uint256(block.timestamp + expires * 60) << _BITPOS_EXPIRES) |
-            uint256(uint160(_msgSenderERC721A()));
+        _setUserAndExpiration(tokenId, _msgSenderERC721A(), expires);
     }
 
     /**
-     * @notice Funciton to set the rent fee for a token
+     * @dev Sets the `user` and `expires` for `tokenId`.
+     * The zero address indicates there is no user.
      *
-     * @param tokenId The token to set the rent fee
-     * @param ratePerMinute The rent fee in UNCN per minute
-     * @dev The rent fee is set in UNCN per minute
+     * Requirements:
+     *
+     * - The caller must own `tokenId` or be an approved operator.
      */
-    function setRentFee(
+    function setUser(
         uint256 tokenId,
-        uint128 ratePerMinute
+        address user,
+        uint64 expires
     ) public virtual override isAuthorized(tokenId) {
-        if (ratePerMinute == rentablesInfo[tokenId].ratePerMinute) {
-            revert FeeAlreadySet();
-        }
-        rentablesInfo[tokenId].ratePerMinute = ratePerMinute;
+        _setUserAndExpiration(tokenId, user, expires);
     }
 
     /**
-     * @notice Function to set the rentable status of a token
+     * @notice Function to set the rentable status and/or fee of a token
      *
-     * @param tokenId The token to set the rentable status
-     * @param rentable The rentable status of the token
-     */
-    function setRentable(
-        uint256 tokenId,
-        bool rentable
-    ) public virtual override isAuthorized(tokenId) {
-        if (rentablesInfo[tokenId].rentable == rentable) {
-            revert AlreadySet();
-        }
-        rentablesInfo[tokenId].rentable = rentable;
-    }
-
-    /**
-     * @notice Function to set the rentable status and fee of a token
-     *
-     * @param tokenId The token to set the rentable status and fee
+     * @param tokenId The token to set the rentable status and/or fee
      * @param rentable The rentable status of the token
      * @param ratePerMinute The rent fee in UNCN per minute
      * @dev The rent fee is set in UNCN per minute
@@ -142,14 +116,22 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
         bool rentable,
         uint128 ratePerMinute
     ) public virtual isAuthorized(tokenId) {
-        if (rentablesInfo[tokenId].rentable == rentable) {
-            revert AlreadySet();
+        bool statusChanged = false;
+        bool feeChanged = false;
+
+        if (rentablesInfo[tokenId].rentable != rentable) {
+            rentablesInfo[tokenId].rentable = rentable;
+            statusChanged = true;
         }
-        if (ratePerMinute == rentablesInfo[tokenId].ratePerMinute) {
-            revert FeeAlreadySet();
+
+        if (rentablesInfo[tokenId].ratePerMinute != ratePerMinute) {
+            rentablesInfo[tokenId].ratePerMinute = ratePerMinute;
+            feeChanged = true;
         }
-        rentablesInfo[tokenId].rentable = rentable;
-        rentablesInfo[tokenId].ratePerMinute = ratePerMinute;
+
+        if (!statusChanged && !feeChanged) {
+            revert NoChange();
+        }
     }
 
     /**

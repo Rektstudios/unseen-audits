@@ -72,8 +72,9 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
   }
 
   before(async () => {
-    ({ owner, minter, signer, rentee, malicious, payer } =
-      await loadFixture(setupFixture));
+    ({ owner, minter, signer, rentee, malicious, payer } = await loadFixture(
+      setupFixture
+    ));
 
     ({ feeCollector } = await unseenFixture(owner));
   });
@@ -386,7 +387,7 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
   });
 
   context('rentable tokens', async function () {
-    it('user should be able to rent his tokens', async function () {
+    it('user should be able to rent out his tokens', async function () {
       await mintSignedTokens({
         minter,
         signer,
@@ -399,16 +400,20 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
       expect(rentable).to.be.true;
       expect(ratePerMinute).to.eq(amount.div(100));
       const rentAmount = ratePerMinute.mul(60);
+      const minterBalance = await mockERC20.balanceOf(minter.address);
       await expect(theGenerates.connect(rentee).rent(1, 60)).to.emit(
         theGenerates,
         'UpdateUser'
       );
       expect(await theGenerates.userOf(1)).to.equal(rentee.address);
+      expect(await mockERC20.balanceOf(minter.address)).to.eq(
+        rentAmount.mul(9000).div(10000).add(minterBalance)
+      );
       expect(await mockERC20.balanceOf(feeCollector.address)).to.eq(
         rentAmount.mul(1000).div(10000).add(mintPrice)
       );
     });
-    it('user should not be able to rent a rented token', async function () {
+    it('user should not be able to rent out a rented token', async function () {
       await mintSignedTokens({
         minter,
         signer,
@@ -425,7 +430,7 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
         theGenerates.connect(rentee).rent(1, 60)
       ).to.be.revertedWithCustomError(theGenerates, 'Rented');
     });
-    it('user should be able to rent a token again once expiry time is reached', async function () {
+    it('user should be able to rent out a token again once expiry time is reached', async function () {
       await mintSignedTokens({
         minter,
         signer,
@@ -482,6 +487,18 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
         theGenerates,
         'SetUserCallerNotOwnerNorApproved'
       );
+    });
+    it('owner should be able to set rentable info', async function () {
+      await mintSignedTokens({
+        minter,
+        signer,
+      });
+      await theGenerates.connect(minter).setRentablesInfo(1, true, amount);
+      await expect(
+        theGenerates.connect(minter).setRentablesInfo(1, true, amount)
+      ).to.be.revertedWithCustomError(theGenerates, 'NoChange');
+
+      expect(await theGenerates.getTokenRentInfo(1)).to.deep.eq([amount, true]);
     });
     it('owner of token should be able to set user as rentee (without payment)', async function () {
       await mintSignedTokens({
