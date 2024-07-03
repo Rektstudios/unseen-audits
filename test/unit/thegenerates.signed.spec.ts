@@ -428,7 +428,7 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
       expect(await theGenerates.userOf(1)).to.equal(rentee.address);
       await expect(
         theGenerates.connect(rentee).rent(1, 60)
-      ).to.be.revertedWithCustomError(theGenerates, 'Rented');
+      ).to.be.revertedWithCustomError(theGenerates, 'TokenIsRented');
     });
     it('user should be able to rent out a token again once expiry time is reached', async function () {
       await mintSignedTokens({
@@ -540,7 +540,7 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
         theGenerates
           .connect(minter)
           .setUser(1, rentee.address, timestamp.add(duration.hours(1)))
-      ).to.be.revertedWithCustomError(theGenerates, 'Rented');
+      ).to.be.revertedWithCustomError(theGenerates, 'TokenIsRented');
     });
   });
 

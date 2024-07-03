@@ -15,7 +15,7 @@ interface IERC4907A is IERC721A {
     /**
      * The token is already rented out.
      */
-    error Rented();
+    error TokenIsRented();
 
     /**
      * Trying to rent a token with 0 expiry.

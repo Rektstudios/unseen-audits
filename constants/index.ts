@@ -55,6 +55,3 @@ export const ERC20Interface = new Interface(ERC20ABI.abi);
 export const ERC721Interface = new Interface(ERC721ABI.abi);
 export const ERC1155Interface = new Interface(ERC1155ABI.abi);
 export const AtomicizerInterface = new Interface(AtomicizerABI.abi);
-
-export const openseaConduitAddress =
-  '0x1E0049783F008A0085193E00003D00cd54003c71';

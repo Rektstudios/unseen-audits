@@ -58,7 +58,7 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
         uint64 expires
     ) private {
         if (userOf(tokenId) != address(0)) {
-            revert Rented();
+            revert TokenIsRented();
         }
         if (expires == 0) {
             revert NoExpiryAssigned();

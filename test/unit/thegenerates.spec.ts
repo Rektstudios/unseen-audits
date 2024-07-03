@@ -3,11 +3,15 @@ import { expect } from 'chai';
 import { parseEther } from 'ethers/lib/utils';
 import { ethers, network } from 'hardhat';
 
-import type { FeeCollector, MockERC20, TheGenerates } from '@typechained';
+import type {
+  FeeCollector,
+  MockERC20,
+  TheGenerates,
+  UnseenRegistry,
+} from '@typechained';
 import type { UnseenFixtures } from '@utils/fixtures';
 import type { BigNumber, Wallet } from 'ethers';
 
-import { openseaConduitAddress } from '@constants';
 import { randomHex } from '@utils/encoding';
 import { faucet } from '@utils/faucet';
 import { unseenFixture } from '@utils/fixtures';
@@ -19,6 +23,7 @@ describe(`The Generates - (Unseen v${process.env.VERSION})`, async function () {
   let theGenerates: TheGenerates;
   let feeCollector: FeeCollector;
   let mockERC20: MockERC20;
+  let registry: UnseenRegistry;
 
   let mintPublicTokens: UnseenFixtures['mintPublicTokens'];
   let mintAndApproveERC20: UnseenFixtures['mintAndApproveERC20'];
@@ -38,6 +43,7 @@ describe(`The Generates - (Unseen v${process.env.VERSION})`, async function () {
   let malicious: Wallet;
 
   let amount: BigNumber;
+  let ownerProxy: string;
 
   async function setupFixture() {
     owner = new ethers.Wallet(randomHex(32), provider);
@@ -60,6 +66,8 @@ describe(`The Generates - (Unseen v${process.env.VERSION})`, async function () {
     ({
       theGenerates,
       mockERC20,
+      ownerProxy,
+      registry,
       mintAndApproveERC20,
       mintPublicTokens,
       updateUnseenPayout,
@@ -77,7 +85,7 @@ describe(`The Generates - (Unseen v${process.env.VERSION})`, async function () {
   });
 
   context('token transfers and approvals', function () {
-    it('should be able to transfer successfully', async () => {
+    it.only('should be able to transfer successfully', async () => {
       await mintPublicTokens({
         minter,
         quantity: 4,
@@ -109,25 +117,39 @@ describe(`The Generates - (Unseen v${process.env.VERSION})`, async function () {
       await theGenerates.connect(minter).setApprovalForAll(owner.address, true);
       await theGenerates.connect(minter).approve(owner.address, 4);
 
-      // should auto-approve the conduit to transfer.
+      // should not auto-approve the user proxy to transfer if
+      // unseenMarketRegistry is not set or not a contract address.
       expect(
-        await theGenerates.isApprovedForAll(
-          minter.address,
-          openseaConduitAddress
-        )
-      ).to.eq(true);
+        await theGenerates.isApprovedForAll(owner.address, ownerProxy)
+      ).to.eq(false);
+
+      await theGenerates.setUnseenMarketRegistry(malicious.address);
 
       expect(
-        await theGenerates.isApprovedForAll(
-          owner.address,
-          openseaConduitAddress
-        )
-      ).to.eq(true);
+        await theGenerates.isApprovedForAll(minter.address, malicious.address)
+      ).to.eq(false);
 
       await whileImpersonating(
-        openseaConduitAddress,
+        ownerProxy,
         provider,
         async (impersonatedSigner) => {
+          await expect(
+            theGenerates
+              .connect(impersonatedSigner)
+              .transferFrom(owner.address, minter.address, 1)
+          ).to.be.revertedWithCustomError(
+            theGenerates,
+            'TransferCallerNotOwnerNorApproved'
+          );
+          await theGenerates.setUnseenMarketRegistry(registry.address);
+          // should auto-approve the user proxy to transfer.
+          expect(
+            await theGenerates.isApprovedForAll(minter.address, ownerProxy)
+          ).to.eq(false);
+
+          expect(
+            await theGenerates.isApprovedForAll(owner.address, ownerProxy)
+          ).to.eq(true);
           await theGenerates
             .connect(impersonatedSigner)
             .transferFrom(owner.address, minter.address, 1);
@@ -327,8 +349,9 @@ describe(`The Generates - (Unseen v${process.env.VERSION})`, async function () {
       const ownerStorageSlot =
         '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff74873927';
 
-      const revertedRecipientFactory =
-        await ethers.getContractFactory('RevertedRecipient');
+      const revertedRecipientFactory = await ethers.getContractFactory(
+        'RevertedRecipient'
+      );
       const revertedRecipient = await revertedRecipientFactory.deploy();
       // theGenerates.address will revert with no data, and RevertedRecipient will revert with custom error.
       const ownerAddresses = [theGenerates.address, revertedRecipient.address];

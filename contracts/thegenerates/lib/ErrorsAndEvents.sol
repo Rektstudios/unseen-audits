@@ -139,6 +139,11 @@ interface ErrorsAndEvents {
     error SameTransferValidator();
 
     /**
+     * @dev Revert with an error if unseen market registry is being set to the same address.
+     */
+    error SameUnseenMarketRegistry();
+
+    /**
      * @dev An event with details of a mint, for analytical purposes.
      *
      * @param payer          The address who payed for the tx.

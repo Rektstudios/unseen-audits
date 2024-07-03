@@ -215,6 +215,26 @@ contract ContractMetadata is
     }
 
     /**
+     * @notice Set the transfer validator. Only callable by the token owner.
+     */
+    function setTransferValidator(address newValidator) external onlyOwner {
+        // Set the new transfer validator.
+        _setTransferValidator(newValidator);
+    }
+
+    /**
+     * @notice Set unseen market registry. Only callable by the token owner.
+     */
+    function setUnseenMarketRegistry(
+        address _unseenMarketRegistry
+    ) external onlyOwner {
+        if (_unseenMarketRegistry == unseenMarketRegistry)
+            revert SameUnseenMarketRegistry();
+        // Set the new unseen market registry.
+        unseenMarketRegistry = _unseenMarketRegistry;
+    }
+
+    /**
      * @notice Returns the base URI for token metadata.
      */
     function baseURI() external view override returns (string memory) {
@@ -296,14 +316,6 @@ contract ContractMetadata is
     }
 
     /**
-     * @notice Set the transfer validator. Only callable by the token owner.
-     */
-    function setTransferValidator(address newValidator) external onlyOwner {
-        // Set the new transfer validator.
-        _setTransferValidator(newValidator);
-    }
-
-    /**
      * @dev Hook that is called before any token transfer.
      *      This includes minting and burning.
      */
@@ -314,6 +326,10 @@ contract ContractMetadata is
         uint256 /* quantity */
     ) internal virtual override {
         if (from != address(0) && to != address(0)) {
+            // Restrict transfer if token is rented.
+            if (userOf(startTokenId) != address(0)) {
+                revert TokenIsRented();
+            }
             // Call the transfer validator if one is set.
             address transferValidator = _transferValidator;
             if (transferValidator != address(0)) {
@@ -323,10 +339,6 @@ contract ContractMetadata is
                     to,
                     startTokenId
                 );
-            }
-            // Restrict transfer if token is rented.
-            if (userOf(startTokenId) != address(0)) {
-                revert Rented();
             }
         }
     }
