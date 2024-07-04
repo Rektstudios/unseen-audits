@@ -82,6 +82,13 @@ contract ContractMetadata is
     }
 
     /**
+     *  @notice Lets a user release his token to its owner before rent expires.
+     *  @param tokenId The tokenId of the NFT to rent.
+     */
+    function releaseToken(uint256 tokenId) external override {
+        _releaseToken(tokenId);
+    }
+    /**
      * @notice Sets the base URI for the token metadata and emits an event.
      *
      * @param newBaseURI The new base URI to set.

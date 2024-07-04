@@ -85,7 +85,7 @@ describe(`The Generates - (Unseen v${process.env.VERSION})`, async function () {
   });
 
   context('token transfers and approvals', function () {
-    it.only('should be able to transfer successfully', async () => {
+    it('should be able to transfer successfully', async () => {
       await mintPublicTokens({
         minter,
         quantity: 4,

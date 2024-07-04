@@ -4,19 +4,26 @@ import { BigNumber, type Wallet } from 'ethers';
 import { parseEther } from 'ethers/lib/utils';
 import { ethers, network } from 'hardhat';
 
-import type { FeeCollector, TheGenerates } from '@typechained';
+import type {
+  FeeCollector,
+  MockTransferValidator,
+  TheGenerates,
+} from '@typechained';
 import type { UnseenFixtures } from '@utils/fixtures';
 
 import { ZERO_ADDRESS, ZERO_BYTES32 } from '@constants';
 import { randomHex } from '@utils/encoding';
 import { faucet } from '@utils/faucet';
 import { unseenFixture } from '@utils/fixtures';
+import { deployContract } from '@utils/contracts';
 
 describe(`The Generates Contract Metadata - (Unseen v${process.env.VERSION})`, async function () {
   const { provider } = ethers;
 
   let theGenerates: TheGenerates;
   let feeCollector: FeeCollector;
+  let mockTransferValidatorAlwaysReverts: MockTransferValidator;
+  let mockTransferValidatorAlwaysSucceeds: MockTransferValidator;
 
   let mintPublicTokens: UnseenFixtures['mintPublicTokens'];
   let getRoyaltyInfo: UnseenFixtures['getRoyaltyInfo'];
@@ -87,7 +94,20 @@ describe(`The Generates Contract Metadata - (Unseen v${process.env.VERSION})`, a
     );
 
     await updateUnseenPayout({ payoutAddress: feeCollector.address });
+
+    mockTransferValidatorAlwaysReverts = await deployContract(
+      'MockTransferValidator',
+      owner,
+      true
+    );
+
+    mockTransferValidatorAlwaysSucceeds = await deployContract(
+      'MockTransferValidator',
+      owner,
+      false
+    );
   });
+
   context('contract access control', async function () {
     it('only owner can set base uri', async () => {
       expect(await getBaseUri()).to.equal('');
@@ -312,6 +332,44 @@ describe(`The Generates Contract Metadata - (Unseen v${process.env.VERSION})`, a
       );
 
       expect(await getProvenanceHash()).to.equal(firstProvenanceHash);
+    });
+
+    it('only owner can set transfer validator', async () => {
+      await expect(
+        theGenerates
+          .connect(bob)
+          .setTransferValidator(mockTransferValidatorAlwaysReverts.address)
+      ).to.be.revertedWithCustomError(theGenerates, 'Unauthorized');
+
+      await expect(
+        theGenerates.setTransferValidator(
+          mockTransferValidatorAlwaysReverts.address
+        )
+      )
+        .to.emit(theGenerates, 'TransferValidatorUpdated')
+        .withArgs(ZERO_ADDRESS, mockTransferValidatorAlwaysReverts.address);
+    });
+
+    it('transfer validator policies applies properly', async () => {
+      await theGenerates.setTransferValidator(
+        mockTransferValidatorAlwaysReverts.address
+      );
+      await setMaxSupply({ supply: 1 });
+      await mintPublicTokens({
+        minter: owner,
+      });
+
+      await expect(
+        theGenerates.transferFrom(owner.address, bob.address, 1)
+      ).to.be.revertedWith('MockTransferValidator: always reverts');
+
+      await theGenerates.setTransferValidator(
+        mockTransferValidatorAlwaysSucceeds.address
+      );
+
+      await theGenerates.transferFrom(owner.address, bob.address, 1);
+
+      expect(await theGenerates.ownerOf(1)).to.eq(bob.address);
     });
 
     it('revert on unsupported function selector', async () => {

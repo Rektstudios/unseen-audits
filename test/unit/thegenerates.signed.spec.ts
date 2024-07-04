@@ -17,7 +17,7 @@ import { randomHex } from '@utils/encoding';
 import { faucet } from '@utils/faucet';
 import { unseenFixture } from '@utils/fixtures';
 import { deployContract, getCustomRevertSelector } from '@utils/helpers';
-import { clock, duration, increaseBy } from '@utils/time';
+import { duration, increaseBy } from '@utils/time';
 import { MintType } from '@utils/types';
 
 const { parseEther } = ethers.utils;
@@ -505,10 +505,7 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
         minter,
         signer,
       });
-      const timestamp = await clock.timestamp();
-      await theGenerates
-        .connect(minter)
-        .setUser(1, rentee.address, timestamp.add(duration.hours(1)));
+      await theGenerates.connect(minter).setUser(1, rentee.address, 60);
       expect(await theGenerates.userOf(1)).to.equal(rentee.address);
     });
     it('user should not be able to setUser of token (without payment) if not owner or approved', async function () {
@@ -517,11 +514,8 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
         signer,
       });
       await theGenerates.connect(minter).setRentablesInfo(1, true, amount);
-      const timestamp = await clock.timestamp();
       await expect(
-        theGenerates
-          .connect(rentee)
-          .setUser(1, rentee.address, timestamp.add(duration.hours(1)))
+        theGenerates.connect(rentee).setUser(1, rentee.address, 60)
       ).to.be.revertedWithCustomError(
         theGenerates,
         'SetUserCallerNotOwnerNorApproved'
@@ -532,15 +526,52 @@ describe(`The Generates Signed Mint - (Unseen v${process.env.VERSION})`, async f
         minter,
         signer,
       });
-      const timestamp = await clock.timestamp();
-      await theGenerates
-        .connect(minter)
-        .setUser(1, rentee.address, timestamp.add(duration.hours(1)));
+      await theGenerates.connect(minter).setUser(1, rentee.address, 60);
+      await expect(
+        theGenerates.connect(minter).setUser(1, rentee.address, 60)
+      ).to.be.revertedWithCustomError(theGenerates, 'TokenIsRented');
+    });
+    it('owner of token should not be able to transfer his token if rented out', async function () {
+      await mintSignedTokens({
+        minter,
+        signer,
+      });
+      await theGenerates.connect(minter).setUser(1, rentee.address, 60);
+      expect(await theGenerates.userOf(1)).to.equal(rentee.address);
+
       await expect(
         theGenerates
           .connect(minter)
-          .setUser(1, rentee.address, timestamp.add(duration.hours(1)))
+          .transferFrom(minter.address, rentee.address, 1)
       ).to.be.revertedWithCustomError(theGenerates, 'TokenIsRented');
+    });
+    it('owner of token should be able to transfer his token if it is release by rentee', async function () {
+      await mintSignedTokens({
+        minter,
+        signer,
+      });
+      await theGenerates.connect(minter).setUser(1, rentee.address, 60);
+      expect(await theGenerates.userOf(1)).to.equal(rentee.address);
+
+      await expect(theGenerates.releaseToken(1)).to.be.revertedWithCustomError(
+        theGenerates,
+        'NotAllowed'
+      );
+
+      await theGenerates.connect(rentee).releaseToken(1);
+
+      expect(await theGenerates.userOf(1)).to.eq(ZERO_ADDRESS);
+
+      await theGenerates.connect(minter).setUser(1, owner.address, 60);
+
+      expect(await theGenerates.userOf(1)).to.equal(owner.address);
+      await increaseBy.timestamp(duration.hours(2));
+
+      //rent expires and owner not anymore userOf(1) so he cannot release a not rented token
+      await expect(theGenerates.releaseToken(1)).to.be.revertedWithCustomError(
+        theGenerates,
+        'NotAllowed'
+      );
     });
   });
 

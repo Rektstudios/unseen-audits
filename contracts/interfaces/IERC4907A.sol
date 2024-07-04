@@ -28,6 +28,11 @@ interface IERC4907A is IERC721A {
     error RentingDisabled();
 
     /**
+     * The caller is not allowed.
+     */
+    error NotAllowed();
+
+    /**
      * The token id rentable status is already set.
      */
     error AlreadySet();
@@ -77,6 +82,11 @@ interface IERC4907A is IERC721A {
      * @dev Rent a token id for _expires time.
      */
     function rent(uint256 tokenId, uint64 _expires) external;
+
+    /**
+     * @dev Release a token id before rent expires.
+     */
+    function releaseToken(uint256 tokenId) external;
 
     /**
      *  @notice Set the rentable status and rent fee of a specific token.

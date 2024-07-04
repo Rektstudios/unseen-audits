@@ -2,7 +2,6 @@
 pragma solidity ^0.8.26;
 
 import { IERC4907A } from "../interfaces/IERC4907A.sol";
-
 import { ERC721A, IERC721A } from "erc721a/contracts/ERC721A.sol";
 
 /**
@@ -85,6 +84,22 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
         }
         dueAmount = rentablesInfo[tokenId].ratePerMinute * expires;
         _setUserAndExpiration(tokenId, _msgSenderERC721A(), expires);
+    }
+
+    /**
+     * @notice Internal function for releasing a rented token
+     *
+     * @param tokenId The token to rent
+     *
+     *        only callable by userOf tokenId.
+     */
+    function _releaseToken(uint256 tokenId) internal virtual {
+        if (userOf(tokenId) != msg.sender) {
+            revert NotAllowed();
+        }
+
+        // Reset the _packedUserInfo for the tokenId
+        _packedUserInfo[tokenId] = 0;
     }
 
     /**
