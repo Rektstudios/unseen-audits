@@ -1,4 +1,4 @@
-import { BigNumber, Wallet } from 'ethers/lib/ethers';
+import { BigNumber, BigNumberish, Wallet } from 'ethers/lib/ethers';
 import { hexlify, randomBytes } from 'ethers/lib/utils';
 import fs from 'fs';
 import { ethers, network } from 'hardhat';
@@ -20,6 +20,9 @@ export const validTokenID = (signer: Wallet) =>
 export const randomHex = (bytes = 16) => hexlify(randomBytes(bytes));
 
 export const random128 = () => BigInt(randomHex(16));
+
+export const toBigNumber = (num: number) =>
+  ethers.BigNumber.from(num.toLocaleString('fullwide', { useGrouping: false }));
 
 export const LoadSchedules = () => {
   try {

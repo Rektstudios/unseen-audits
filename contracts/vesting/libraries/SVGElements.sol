@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.26;
 
-import { Math } from "@openzeppelin-4.9.6/contracts/utils/math/Math.sol";
-import { Strings } from "@openzeppelin-4.9.6/contracts/utils/Strings.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 library SVGElements {
     using Strings for string;

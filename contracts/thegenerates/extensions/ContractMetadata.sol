@@ -173,7 +173,7 @@ contract ContractMetadata is
     /**
      * @notice Sets the provenance hash and emits an event.
      *
-     *         The provenance hash is used for random reveals, which
+     *         The provenance hash is used for reveals, which
      *         is a hash of the ordered metadata to show it has not been
      *         modified after mint started.
      *
@@ -185,11 +185,6 @@ contract ContractMetadata is
         // Ensure the sender is only the owner or configurer contract.
         _onlyOwnerOrConfigurer();
 
-        // Revert if any items have been minted.
-        if (_totalMinted() != 0) {
-            revert ProvenanceHashCannotBeSetAfterMintStarted();
-        }
-
         // Keep track of the old provenance hash for emitting with the event.
         bytes32 oldProvenanceHash = _provenanceHash;
 
@@ -197,6 +192,9 @@ contract ContractMetadata is
         _provenanceHash = newProvenanceHash;
 
         // Emit an event with the update.
+        // Users can track events onchain in case provenance hashes are
+        // updated due to seasonal drop (_maxSupply update).
+        // Its will also be verifiable off-chain for additional transparency.
         emit ProvenanceHashUpdated(oldProvenanceHash, newProvenanceHash);
     }
 

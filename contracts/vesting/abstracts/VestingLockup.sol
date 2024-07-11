@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import { IERC4906 } from "@openzeppelin-4.9.6/contracts/interfaces/IERC4906.sol";
-import { ERC721 } from "@openzeppelin-4.9.6/contracts/token/ERC721/ERC721.sol";
+import { IERC4906 } from "@openzeppelin/contracts/interfaces/IERC4906.sol";
+import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { Ownable } from "solady/src/auth/Ownable.sol";
 import { IVestingLockup, IERC721Metadata } from "../interfaces/IVestingLockup.sol";
 import { IUnseenVestingNFTDescriptor } from "../interfaces/IUnseenVestingNFTDescriptor.sol";
@@ -71,16 +71,6 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
     }
 
     /**
-     * @notice Emits an ERC-4906 event to trigger an update of
-     *         the NFT metadata.
-     * @param scheduleId The schedule id for the update.
-     */
-    modifier updateMetadata(uint256 scheduleId) {
-        _;
-        emit MetadataUpdate({ _tokenId: scheduleId });
-    }
-
-    /**
      * @notice Retrieves the recipient of the schedule.
      * @param scheduleId The schedule id for the query.
      * @return recipient The address of the recipient.
@@ -88,7 +78,7 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
     function getRecipient(
         uint256 scheduleId
     ) external view override returns (address recipient) {
-        _requireMinted({ tokenId: scheduleId });
+        _requireOwned({ tokenId: scheduleId });
         recipient = _ownerOf(scheduleId);
     }
 
@@ -154,7 +144,7 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
         override(IERC721Metadata, ERC721)
         returns (string memory uri)
     {
-        _requireMinted({ tokenId: scheduleId });
+        _requireOwned({ tokenId: scheduleId });
         uri = _nftDescriptor.tokenURI({
             unseenVesting: address(this),
             scheduleId: scheduleId
@@ -207,7 +197,7 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
             revert Errors.ScheduleNotDepleted(scheduleId);
         }
 
-        if (!_isApprovedOrOwner(msg.sender, scheduleId)) {
+        if (!_isCallerScheduleRecipientOrApproved(scheduleId)) {
             revert Errors.Vesting_Unauthorized(scheduleId, msg.sender);
         }
 
@@ -257,13 +247,7 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
      */
     function renounce(
         uint256 scheduleId
-    )
-        external
-        override
-        noDelegateCall
-        notNull(scheduleId)
-        updateMetadata(scheduleId)
-    {
+    ) external override noDelegateCall notNull(scheduleId) {
         Lockup.Status status = _statusOf(scheduleId);
         if (status == Lockup.Status.DEPLETED) {
             revert Errors.ScheduleDepleted(scheduleId);
@@ -279,6 +263,8 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
 
         _renounce(scheduleId);
         emit IVestingLockup.RenounceLockupSchedule(scheduleId);
+
+        emit MetadataUpdate({ _tokenId: scheduleId });
     }
 
     /**
@@ -316,24 +302,9 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
         uint256 scheduleId,
         address to,
         uint128 amount
-    ) public override noDelegateCall updateMetadata(scheduleId) {
+    ) public override noDelegateCall {
         if (isDepleted(scheduleId)) {
             revert Errors.ScheduleDepleted(scheduleId);
-        }
-
-        bool isCallerScheduleSender = _isCallerScheduleSender(scheduleId);
-
-        if (
-            !isCallerScheduleSender &&
-            !_isApprovedOrOwner(msg.sender, scheduleId)
-        ) {
-            revert Errors.Vesting_Unauthorized(scheduleId, msg.sender);
-        }
-
-        address recipient = _ownerOf(scheduleId);
-
-        if (isCallerScheduleSender && to != recipient) {
-            revert Errors.InvalidSenderWithdrawal(scheduleId, msg.sender, to);
         }
 
         if (to == address(0)) {
@@ -344,12 +315,29 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
             revert Errors.WithdrawAmountZero(scheduleId);
         }
 
+        bool isCallerScheduleSender = _isCallerScheduleSender(scheduleId);
+
+        if (
+            !isCallerScheduleSender &&
+            !_isCallerScheduleRecipientOrApproved(scheduleId)
+        ) {
+            revert Errors.Vesting_Unauthorized(scheduleId, msg.sender);
+        }
+
+        address recipient = _ownerOf(scheduleId);
+
+        if (isCallerScheduleSender && to != recipient) {
+            revert Errors.InvalidSenderWithdrawal(scheduleId, msg.sender, to);
+        }
+
         uint128 withdrawableAmount = _withdrawableAmountOf(scheduleId);
         if (amount > withdrawableAmount) {
             revert Errors.Overdraw(scheduleId, amount, withdrawableAmount);
         }
 
         _withdraw(scheduleId, to, amount);
+
+        emit MetadataUpdate({ _tokenId: scheduleId });
     }
 
     /**
@@ -430,45 +418,6 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
     }
 
     /**
-     * @notice Overrides the internal ERC-721 transfer function to emit
-     *         an ERC-4906 event upon transfer.
-     *         The goal is to refresh the NFT metadata on external platforms.
-     * @dev This event is also emitted when the NFT is minted or burned.
-     * @param scheduleId The id of the schedule NFT that is being transferred.
-     */
-    function _afterTokenTransfer(
-        address,
-        address,
-        uint256 scheduleId,
-        uint256
-    ) internal override updateMetadata(scheduleId) {}
-
-    /**
-     * @notice Overrides the internal ERC-721 transfer function to check
-     *         that the schedule is transferable.
-     * @dev There are two cases when the transferable flag is ignored:
-     *      - If `from` is 0, then the transfer is a mint and is allowed.
-     *      - If `to` is 0, then the transfer is a burn and is also allowed.
-     * @param from The address sending the token.
-     * @param to The address receiving the token.
-     * @param scheduleId The id of the schedule NFT being transferred.
-     */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 scheduleId,
-        uint256
-    ) internal view override {
-        if (
-            !isTransferable(scheduleId) &&
-            to != address(0) &&
-            from != address(0)
-        ) {
-            revert Errors.NotTransferable(scheduleId);
-        }
-    }
-
-    /**
      * @dev This function checks whether the current call is a
      *      delegate call, and reverts if it is.
      */
@@ -478,12 +427,52 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
         }
     }
 
+    /// @notice Overrides the {ERC-721._update} function to check that the schedule is transferable, and emits an
+    /// ERC-4906 event.
+    /// @dev There are two cases when the transferable flag is ignored:
+    /// - If the current owner is 0, then the update is a mint and is allowed.
+    /// - If `to` is 0, then the update is a burn and is also allowed.
+    /// @param to The address of the new recipient of the schedule.
+    /// @param scheduleId ID of the schedule to update.
+    /// @param auth Optional parameter. If the value is not zero, the overridden implementation will check that
+    /// `auth` is either the recipient of the schedule, or an approved third party.
+    /// @return The original recipient of the `schedule` before the update.
+    function _update(
+        address to,
+        uint256 scheduleId,
+        address auth
+    ) internal override returns (address) {
+        address from = _ownerOf(scheduleId);
+
+        if (
+            from != address(0) &&
+            to != address(0) &&
+            !isTransferable(scheduleId)
+        ) {
+            revert Errors.NotTransferable(scheduleId);
+        }
+
+        // Emit an ERC-4906 event to trigger an update of the NFT metadata.
+        emit MetadataUpdate({ _tokenId: scheduleId });
+
+        return super._update(to, scheduleId, auth);
+    }
+
     /**
      * @notice Checks whether `msg.sender` is the schedule's sender.
      * @param scheduleId The schedule id for the query.
      * @return True if `msg.sender` is the schedule's sender, false otherwise.
      */
     function _isCallerScheduleSender(
+        uint256 scheduleId
+    ) internal view virtual returns (bool);
+
+    /**
+     * @dev Checks if the caller is the sender of the schedule.
+     * @param scheduleId The ID of the schedule.
+     * @return True if the caller is approved.
+     */
+    function _isCallerScheduleRecipientOrApproved(
         uint256 scheduleId
     ) internal view virtual returns (bool);
 

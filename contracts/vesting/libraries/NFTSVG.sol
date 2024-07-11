@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import { Strings } from "@openzeppelin-4.9.6/contracts/utils/Strings.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { SVGElements } from "./SVGElements.sol";
 
 library NFTSVG {

@@ -434,11 +434,9 @@ describe(`Vesting - (Unseen v${process.env.VERSION})`, async function () {
         mockSchedule.segments[0].amount
       );
 
-      // TODO get ride of to=address(0) check since no schedule can be created for
-      // TODO address 0 as recipient and if withdrawer should be sender or recipient to be able to withdraw then this check is deadcode
       await expect(
         unseenVesting.withdraw(1, AddressZero, 1)
-      ).to.be.revertedWithCustomError(unseenVesting, 'InvalidSenderWithdrawal');
+      ).to.be.revertedWithCustomError(unseenVesting, 'WithdrawToZeroAddress');
 
       await expect(
         unseenVesting.withdraw(1, bob.address, 0)

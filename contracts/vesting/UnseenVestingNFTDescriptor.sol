@@ -2,8 +2,8 @@
 // solhint-disable max-line-length,quotes
 pragma solidity ^0.8.26;
 
-import { Base64 } from "@openzeppelin-4.9.6/contracts/utils/Base64.sol";
-import { Strings } from "@openzeppelin-4.9.6/contracts/utils/Strings.sol";
+import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { IVestingLockup } from "./interfaces/IVestingLockup.sol";
 import { IUnseenVestingNFTDescriptor } from "./interfaces/IUnseenVestingNFTDescriptor.sol";
 import { Lockup } from "./types/DataTypes.sol";
