@@ -447,9 +447,12 @@ export const theGeneratesFixture = async (
     minter: Wallet;
     quantity?: number;
   }) => {
-    const prevPublicDrop = await (
-      theGeneratesInterface as ITheGenerates
-    ).getPublicDrop();
+    const endPublicDrop: any = {
+      startPrice: 0,
+      endPrice: 0,
+      startTime: Math.round(Date.now() / 1000) - 1000,
+      endTime: Math.round(Date.now() / 1000) - 999,
+    };
 
     const temporaryPublicDrop: any = {
       startPrice: 0,
@@ -476,7 +479,7 @@ export const theGeneratesFixture = async (
     });
 
     await (theGeneratesInterface as ITheGenerates).updatePublicDrop(
-      prevPublicDrop
+      endPublicDrop
     );
 
     return transaction;

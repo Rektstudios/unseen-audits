@@ -211,9 +211,9 @@ describe(`The Generates Contract Metadata - (Unseen v${process.env.VERSION})`, a
       await expect(
         updateRoyalties({
           treasury: feeCollector.address,
-          bps: 10_001,
+          bps: 1_001,
         })
-      ).to.be.revertedWithCustomError(theGenerates, 'RoyaltyOverflow');
+      ).to.be.revertedWithCustomError(theGenerates, 'InvalidBasisPoints');
 
       await expect(
         updateRoyalties({
@@ -317,21 +317,11 @@ describe(`The Generates Contract Metadata - (Unseen v${process.env.VERSION})`, a
         .to.emit(theGenerates, 'ProvenanceHashUpdated')
         .withArgs(defaultProvenanceHash, firstProvenanceHash);
 
-      // Provenance hash should not be updatable after the first token has minted.
-      // Mint a token.
-      await setMaxSupply({ supply: 1 });
-      await mintPublicTokens({
-        minter: owner,
-      });
 
-      await expect(
-        setProvenanceHash({ hash: secondProvenanceHash })
-      ).to.be.revertedWithCustomError(
-        theGenerates,
-        'ProvenanceHashCannotBeSetAfterMintStarted'
-      );
-
-      expect(await getProvenanceHash()).to.equal(firstProvenanceHash);
+      // @note will be able to update provenanceHash due to the nature our seasonal drops.
+      await expect(setProvenanceHash({ hash: secondProvenanceHash }))
+      .to.emit(theGenerates, 'ProvenanceHashUpdated')
+      .withArgs(firstProvenanceHash, secondProvenanceHash);
     });
 
     it('only owner can set transfer validator', async () => {
