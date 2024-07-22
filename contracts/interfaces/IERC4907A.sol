@@ -58,6 +58,20 @@ interface IERC4907A is IERC721A {
     );
 
     /**
+     * @dev Emitted when the `rentee` of an NFT release the token before it expires.
+     */
+    event TokenReleased(uint256 indexed tokenId);
+
+    /**
+     * @dev Emitted when an authorized user set token's rentable infos.
+     */
+    event RentableInfo(
+        uint256 indexed tokenId,
+        bool rentable,
+        uint256 ratePerMinute
+    );
+
+    /**
      * @dev Sets the `user` and `expires` for `tokenId`.
      * The zero address indicates there is no user.
      *

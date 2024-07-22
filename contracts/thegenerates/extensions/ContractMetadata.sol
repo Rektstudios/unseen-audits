@@ -210,6 +210,8 @@ contract ContractMetadata is
         // Ensure the sender is only the owner or configurer contract.
         _onlyOwnerOrConfigurer();
 
+        if (feeNumerator > 1_000) revert InvalidBasisPoints(feeNumerator);
+
         // Set the default royalty.
         // ERC2981 implementation ensures feeNumerator <= feeDenominator
         // and receiver != address(0).
@@ -237,6 +239,8 @@ contract ContractMetadata is
             revert SameUnseenMarketRegistry();
         // Set the new unseen market registry.
         unseenMarketRegistry = _unseenMarketRegistry;
+
+        emit UnseenMarketRegistryUpdated(_unseenMarketRegistry);
     }
 
     /**

@@ -81,6 +81,8 @@ contract GlobalMaker is ERC1271Mod {
         bytes32 hash = abi.decode(_data, (bytes32));
         address signer = ecrecover(hash, v, r, s);
 
+        if (signer == address(0)) return SIGINVALID;
+
         if (sig == 0xb1f1709c) {
             (, , bytes[] memory calldatas) = abi.decode(
                 _callData[4:],

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import { IERC4906 } from "@openzeppelin/contracts/interfaces/IERC4906.sol";
+import { IERC4906, IERC165 } from "@openzeppelin/contracts/interfaces/IERC4906.sol";
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { Ownable } from "solady/src/auth/Ownable.sol";
 import { IVestingLockup, IERC721Metadata } from "../interfaces/IVestingLockup.sol";
@@ -456,6 +456,19 @@ abstract contract VestingLockup is IERC4906, IVestingLockup, ERC721, Ownable {
         emit MetadataUpdate({ _tokenId: scheduleId });
 
         return super._update(to, scheduleId, auth);
+    }
+
+    /**
+     * @notice Returns whether the interface is supported.
+     *
+     * @param interfaceId The interface id to check against.
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(IERC165, ERC721) returns (bool) {
+        return
+            interfaceId == bytes4(0x49064906) ||
+            super.supportsInterface(interfaceId);
     }
 
     /**

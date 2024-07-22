@@ -56,9 +56,9 @@ interface ErrorsAndEvents {
     error UnseenPayoutNotSet();
 
     /**
-     * @dev Revert if unseen payout basis points exceed 1_000.
+     * @dev Revert if basis points exceed 1_000.
      */
-    error InvalidUnseenPayoutBasisPoints(uint256 totalReceivedBasisPoints);
+    error InvalidBasisPoints(uint256 totalReceivedBasisPoints);
 
     /**
      * @dev Revert with an error if the quantity is set to zero.
@@ -142,6 +142,11 @@ interface ErrorsAndEvents {
      * @dev Revert with an error if unseen market registry is being set to the same address.
      */
     error SameUnseenMarketRegistry();
+
+    /**
+     * @dev An event with the updated unseen market registry.
+     */
+    event UnseenMarketRegistryUpdated(address registry);
 
     /**
      * @dev An event with details of a mint, for analytical purposes.

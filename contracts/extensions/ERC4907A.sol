@@ -100,6 +100,8 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
 
         // Reset the _packedUserInfo for the tokenId
         _packedUserInfo[tokenId] = 0;
+
+        emit TokenReleased(tokenId);
     }
 
     /**
@@ -147,6 +149,8 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
         if (!statusChanged && !feeChanged) {
             revert NoChange();
         }
+
+        emit RentableInfo(tokenId, rentable, ratePerMinute);
     }
 
     /**
@@ -212,7 +216,7 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
     /**
      * @dev Returns the user address for `tokenId`, ignoring the expiry status.
      */
-    function _explicitUserOf(
+    function explicitUserOf(
         uint256 tokenId
     ) external view virtual returns (address) {
         return address(uint160(_packedUserInfo[tokenId]));

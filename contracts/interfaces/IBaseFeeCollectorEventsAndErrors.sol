@@ -16,6 +16,14 @@ interface IBaseFeeCollectorEventsAndErrors {
     event OperatorUpdated(address newOperator);
 
     /**
+     * @dev Emit an event whenever a withdrawal wallet gets updated.
+     *
+     * @param WithdrawalWallet The withdrawal wallet to update.
+     * @param allowed Wether is it whitelisted or not.
+     */
+    event WithdrawalWalletUpdated(address WithdrawalWallet, bool allowed);
+
+    /**
      * @dev Revert with an error when an ERC20 token transfer returns a falsey
      *      value.
      *
@@ -34,6 +42,15 @@ interface IBaseFeeCollectorEventsAndErrors {
      *      an amount greater than the current balance.
      */
     error InvalidNativeTokenAmount(uint256 amount);
+
+    /**
+     * @dev Revert with an error when Eth transfer fails.
+     */
+    error ETHTransferFailure(
+        address withdrawalWallet,
+        uint256 amount,
+        bytes data
+    );
 
     /**
      * @dev Revert with an error when attempting to initialize

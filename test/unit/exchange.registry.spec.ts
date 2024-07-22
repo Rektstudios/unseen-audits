@@ -261,12 +261,32 @@ describe(`Exchange Registry - (Unseen v${process.env.VERSION})`, async function 
           .transferProxyOwnership(ZERO_ADDRESS, { gasLimit: 100_000 })
       ).to.be.revertedWithCustomError(authProxy, 'OwnerIsZeroAddress');
 
-      await expect(authProxy.connect(bob).transferProxyOwnership(alice.address))
-        .to.not.be.reverted;
+      await expect(
+        authProxy.connect(bob).transferProxyOwnership(alice.address)
+      ).to.not.be.reverted;
 
       expect(await registry.proxies(alice.address)).to.eq(proxy);
 
       expect(await authProxy.owner()).to.eq(alice.address);
+    });
+    it('restrict access transfer to transferProxyOwnership function', async function () {
+      let data = ethers.utils.hexConcat([
+        '0xdcfa9222',
+        ethers.utils.defaultAbiCoder.encode(
+          ['address', 'address'],
+          [bob.address, alice.address]
+        ),
+      ]);
+
+      const { authProxy } = await getAuthenticatedProxy(bob);
+
+      expect(await authProxy.owner()).to.eq(bob.address);
+
+      await expect(
+        authProxy
+          .connect(bob)
+          .proxyAssert(registry.address, 0, data, { gasLimit: 100_000 })
+      ).to.be.revertedWithCustomError(authProxy, 'InvalidCaller');
     });
   });
 });

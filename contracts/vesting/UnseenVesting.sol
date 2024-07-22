@@ -13,6 +13,7 @@ import { IUnseenVestingNFTDescriptor } from "./interfaces/IUnseenVestingNFTDescr
 import { Errors } from "./libraries/Errors.sol";
 import { Helpers } from "./libraries/Helpers.sol";
 import { Lockup } from "./types/DataTypes.sol";
+import { ReentrancyGuard } from "solady/src/utils/ReentrancyGuard.sol";
 
 /*
 
@@ -33,7 +34,7 @@ $$ |  $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |      \$$$$$$  |  \$$$$  |\$$$$$$  |\$$$
  * @notice Manages UNCN vesting securely.
  *         Ensures fair, scheduled distribution to recipients.
  */
-contract UnseenVesting is IUnseenVesting, VestingLockup {
+contract UnseenVesting is ReentrancyGuard, IUnseenVesting, VestingLockup {
     using CastingUint128 for uint128;
     using CastingUint40 for uint40;
     using SafeERC20 for IERC20;
@@ -374,6 +375,7 @@ contract UnseenVesting is IUnseenVesting, VestingLockup {
         external
         override
         noDelegateCall
+        nonReentrant
         onlyOwner
         returns (uint256[] memory scheduleIds)
     {
@@ -400,7 +402,14 @@ contract UnseenVesting is IUnseenVesting, VestingLockup {
      */
     function createSchedule(
         Lockup.CreateSchedule calldata params
-    ) external override noDelegateCall onlyOwner returns (uint256 scheduleId) {
+    )
+        external
+        override
+        noDelegateCall
+        nonReentrant
+        onlyOwner
+        returns (uint256 scheduleId)
+    {
         // Checks, Effects and Interactions: create the schedule.
         scheduleId = _createSchedule(params);
     }
@@ -752,7 +761,7 @@ contract UnseenVesting is IUnseenVesting, VestingLockup {
         }
 
         // Effects: mint the NFT to the recipient.
-        _mint({ to: params.recipient, tokenId: scheduleId });
+        _safeMint({ to: params.recipient, tokenId: scheduleId });
 
         // Interactions: transfer the deposit.
         unchecked {

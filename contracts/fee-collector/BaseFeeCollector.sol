@@ -3,9 +3,7 @@
 pragma solidity ^0.8.26;
 
 import { Ownable } from "solady/src/auth/Ownable.sol";
-
 import { IERC20, IBaseFeeCollector } from "../interfaces/IBaseFeeCollector.sol";
-
 import { IBaseFeeCollectorEventsAndErrors } from "../interfaces/IBaseFeeCollectorEventsAndErrors.sol";
 
 /**
@@ -116,7 +114,14 @@ contract BaseFeeCollector is
         }
 
         // Transfer the amount of the native token to the withdrawal address.
-        payable(withdrawalWallet).transfer(amount);
+        (bool success, bytes memory data) = payable(withdrawalWallet).call{
+            value: amount
+        }("");
+
+        // Revert with an error if the ether transfer failed.
+        if (!success) {
+            revert ETHTransferFailure(withdrawalWallet, amount, data);
+        }
     }
 
     /**
@@ -135,6 +140,8 @@ contract BaseFeeCollector is
 
         ///@dev Set the new wallet address mapping.
         _setWithdrawalWallet(newWithdrawalWallet, true);
+
+        emit WithdrawalWalletUpdated(newWithdrawalWallet, true);
     }
 
     /**
@@ -146,6 +153,8 @@ contract BaseFeeCollector is
     ) external override onlyOwner {
         ///@dev Set the withdrawal wallet to false.
         _setWithdrawalWallet(withdrawalWallet, false);
+
+        emit WithdrawalWalletUpdated(withdrawalWallet, false);
     }
 
     /**

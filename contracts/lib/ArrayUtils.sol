@@ -54,7 +54,7 @@ library ArrayUtils {
         }
 
         /* Deal with the last section of the byte array. */
-        if (words != 0) {
+        if (arrayLength % 0x20 > 0) {
             /* This overlaps with bytes already set but is still more efficient than iterating through each of the remaining bytes individually. */
             i = words;
             assembly {

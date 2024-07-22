@@ -3,7 +3,6 @@
 pragma solidity ^0.8.26;
 
 import { BaseFeeCollector } from "./BaseFeeCollector.sol";
-
 import { IFeeCollector, IWrappedNativeToken } from "../interfaces/IFeeCollector.sol";
 
 /*
@@ -93,7 +92,14 @@ contract FeeCollector is BaseFeeCollector, IFeeCollector {
         }
 
         // Transfer the now unwrapped tokens to the withdrawal address.
-        payable(withdrawalWallet).transfer(amount);
+        (bool success, bytes memory _data) = payable(withdrawalWallet).call{
+            value: amount
+        }("");
+
+        // Revert with an error if the ether transfer failed.
+        if (!success) {
+            revert ETHTransferFailure(withdrawalWallet, amount, _data);
+        }
     }
 
     /**

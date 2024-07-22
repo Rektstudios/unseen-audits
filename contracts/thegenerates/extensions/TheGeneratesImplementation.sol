@@ -565,7 +565,7 @@ contract TheGeneratesImplementation is ErrorsAndEvents {
         _onlyDelegateCalled();
 
         // Revert if the startTime is past the endTime.
-        if (publicDrop.startTime > publicDrop.endTime) {
+        if (publicDrop.startTime >= publicDrop.endTime) {
             revert InvalidStartAndEndTime(
                 publicDrop.startTime,
                 publicDrop.endTime
@@ -626,7 +626,7 @@ contract TheGeneratesImplementation is ErrorsAndEvents {
 
         // Ensure fee basis points does not exceed 10%.
         if (_unseenPayout.basisPoints > 1_000) {
-            revert InvalidUnseenPayoutBasisPoints(_unseenPayout.basisPoints);
+            revert InvalidBasisPoints(_unseenPayout.basisPoints);
         }
 
         // Push to storage.

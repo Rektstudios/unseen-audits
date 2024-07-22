@@ -25,7 +25,8 @@ contract ExchangeCore is
 {
     bytes4 internal constant EIP_1271_MAGICVALUE = 0x20c13b0b;
     bytes4 internal constant EIP_1271MOD_MAGICVALUE = 0x89971e76;
-    bytes internal personalSignPrefix = "\x19Ethereum Signed Message:\n";
+    bytes internal constant personalSignPrefix =
+        "\x19Ethereum Signed Message:\n";
 
     /* An order, convenience struct. */
     struct Order {
@@ -137,7 +138,7 @@ contract ExchangeCore is
     }
 
     /**
-     * @notice validation of order through its parameters (listing time, completely filled, static targer existence)
+     * @notice validation of order through its parameters (listing time, completely filled, static target existence)
      * @param order order object to be checked if it's an order valid struct
      * @param hash order hashed in order to validate
      *

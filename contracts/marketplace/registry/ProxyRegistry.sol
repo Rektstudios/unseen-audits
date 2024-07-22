@@ -67,6 +67,13 @@ contract ProxyRegistry is Ownable, ProxyRegistryInterface {
     event AuthRevoked(address indexed addr);
 
     /**
+     * @notice Emitted when proxy access is transferred.
+     * @param from The initial proxy owner transferring the access.
+     * @param to The new proxy owner transferring access to.
+     */
+    event ProxyAccessTransferred(address indexed from, address indexed to);
+
+    /**
      * Enable access for specified contract.
      *
      * @dev ProxyRegistry owner only
@@ -151,5 +158,7 @@ contract ProxyRegistry is Ownable, ProxyRegistryInterface {
         delete proxies[from];
 
         proxies[to] = proxy;
+
+        emit ProxyAccessTransferred(from, to);
     }
 }

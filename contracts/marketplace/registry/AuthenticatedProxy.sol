@@ -22,7 +22,7 @@ contract AuthenticatedProxy {
     /* Whether access has been revoked. */
     bool public revoked;
 
-    /// @notice The original address of the implemenation.
+    /// @notice The original address of the implementation.
     address public implementation;
 
     /* Delegate call could be used to atomically transfer multiple assets owned by the proxy contract with one order. */
@@ -130,8 +130,12 @@ contract AuthenticatedProxy {
         HowToCall howToCall,
         bytes memory data
     ) public returns (bool result) {
-        if (msg.sender != owner && (revoked || !registry.contracts(msg.sender)))
-            revert InvalidCaller();
+        if (
+            (msg.sender != owner &&
+                (revoked || !registry.contracts(msg.sender))) ||
+            dest == address(registry)
+        ) revert InvalidCaller();
+
         bytes memory ret;
 
         if (howToCall == HowToCall.Call) {
