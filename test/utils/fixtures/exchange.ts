@@ -31,13 +31,7 @@ import type {
   OrdersMatch,
   TokenType,
 } from '@utils/types';
-import type {
-  BigNumber,
-  BigNumberish,
-  BytesLike,
-  Signature,
-  Wallet,
-} from 'ethers';
+import { BigNumber, BigNumberish, BytesLike, Signature, Wallet } from 'ethers';
 
 import {
   ERC1155Interface,
@@ -506,13 +500,23 @@ export const marketplaceFixture = async (
     protocolFees: BigNumberish;
     royaltiesFees: BigNumberish;
   }) => {
+    const addresses = [erc721Address, erc20Address];
+    const values = [erc721Id, erc20SellPrice, sellerAmount];
+
+    if (BigNumber.from(protocolFees).gt(0)) {
+      addresses.push(protocol);
+      values.push(protocolFees);
+    }
+
+    if (BigNumber.from(royaltiesFees).gt(0)) {
+      addresses.push(creator);
+      values.push(royaltiesFees);
+    }
+
     // static extradata for both the order and counter order are checked during the StaticMarket calls
     const staticExtradata = defaultAbiCoder.encode(
       ['address[]', 'uint256[]'],
-      [
-        [erc721Address, erc20Address, protocol, creator],
-        [erc721Id, erc20SellPrice, sellerAmount, protocolFees, royaltiesFees],
-      ]
+      [addresses, values]
     );
     const order = {
       registry: registry.address,
@@ -560,13 +564,22 @@ export const marketplaceFixture = async (
     protocolFees: BigNumberish;
     royaltiesFees: BigNumberish;
   }) => {
+    const addresses = [erc20Address, erc721Address];
+    const values = [erc721Id, erc20BuyPrice, sellerAmount];
+
+    if (BigNumber.from(protocolFees).gt(0)) {
+      addresses.push(protocol);
+      values.push(protocolFees);
+    }
+
+    if (BigNumber.from(royaltiesFees).gt(0)) {
+      addresses.push(creator);
+      values.push(royaltiesFees);
+    }
     // static extradata for both the order and counter order are checked during the StaticMarket calls
     const staticExtradata = defaultAbiCoder.encode(
       ['address[]', 'uint256[]'],
-      [
-        [erc20Address, erc721Address, protocol, creator],
-        [erc721Id, erc20BuyPrice, sellerAmount, protocolFees, royaltiesFees],
-      ]
+      [addresses, values]
     );
     const order = {
       registry: registry.address,
@@ -630,9 +643,9 @@ export const marketplaceFixture = async (
       throw new Error("Creator Addresses don't match on orders");
     if (!sellerAmount.eq(sellerAmountOther))
       throw new Error("Seller amount doesn't match on orders");
-    if (!protocolFees.eq(protocolFeesOther))
+    if (protocolFees && !protocolFees.eq(protocolFeesOther))
       throw new Error("Protocol fees doesn't match on orders");
-    if (!royaltiesFees.eq(royaltiesFeesOther))
+    if (royaltiesFees && !royaltiesFees.eq(royaltiesFeesOther))
       throw new Error("Royalties fees doesn't match on orders");
 
     const firstData = ERC721Interface.encodeFunctionData('transferFrom', [
@@ -641,26 +654,37 @@ export const marketplaceFixture = async (
       tokenId,
     ]);
 
-    const secondData = atomicizer.interface.encodeFunctionData('atomicize', [
-      [erc20Address, erc20Address, erc20Address],
-      [0, 0, 0],
-      [
-        ERC20Interface.encodeFunctionData('transferFrom', [
-          buyOrder.maker,
-          sellOrder.maker,
-          sellerAmount,
-        ]),
+    const transferCalls = [
+      ERC20Interface.encodeFunctionData('transferFrom', [
+        buyOrder.maker,
+        sellOrder.maker,
+        sellerAmount,
+      ]),
+    ];
+
+    if (protocolFees && protocolFees.gt(0)) {
+      transferCalls.push(
         ERC20Interface.encodeFunctionData('transferFrom', [
           buyOrder.maker,
           protocol,
           protocolFees,
-        ]),
+        ])
+      );
+    }
+
+    if (royaltiesFees && royaltiesFees.gt(0)) {
+      transferCalls.push(
         ERC20Interface.encodeFunctionData('transferFrom', [
           buyOrder.maker,
           creator,
           royaltiesFees,
-        ]),
-      ],
+        ])
+      );
+    }
+
+    const secondData = atomicizer.interface.encodeFunctionData('atomicize', [
+      new Array(transferCalls.length).fill(erc20Address),
+      transferCalls,
     ]);
 
     const firstCall = { target: erc721Address, howToCall: 0, data: firstData };
@@ -1014,20 +1038,27 @@ export const marketplaceFixture = async (
     protocolFees: BigNumberish;
     royaltiesFees: BigNumberish;
   }) => {
+    const addresses = [erc1155Address, erc20Address];
+    const values = [
+      erc1155Id,
+      erc1155SellNumerator,
+      erc20SellPrice,
+      sellerAmount,
+    ];
+
+    if (BigNumber.from(protocolFees).gt(0)) {
+      addresses.push(protocol);
+      values.push(protocolFees);
+    }
+
+    if (BigNumber.from(royaltiesFees).gt(0)) {
+      addresses.push(creator);
+      values.push(royaltiesFees);
+    }
     // static extradata for both the order and counter order are checked during the StaticMarket calls
     const staticExtradata = defaultAbiCoder.encode(
       ['address[]', 'uint256[]'],
-      [
-        [erc1155Address, erc20Address, protocol, creator],
-        [
-          erc1155Id,
-          erc1155SellNumerator,
-          erc20SellPrice,
-          sellerAmount,
-          protocolFees,
-          royaltiesFees,
-        ],
-      ]
+      [addresses, values]
     );
     const order = {
       registry: registry.address,
@@ -1080,20 +1111,27 @@ export const marketplaceFixture = async (
     protocolFees: BigNumberish;
     royaltiesFees: BigNumberish;
   }) => {
+    const addresses = [erc20Address, erc1155Address];
+    const values = [
+      erc1155Id,
+      erc20BuyPrice,
+      erc1155BuyDenominator,
+      sellerAmount,
+    ];
+
+    if (BigNumber.from(protocolFees).gt(0)) {
+      addresses.push(protocol);
+      values.push(protocolFees);
+    }
+
+    if (BigNumber.from(royaltiesFees).gt(0)) {
+      addresses.push(creator);
+      values.push(royaltiesFees);
+    }
     // static extradata for both the order and counter order are checked during the StaticMarket calls
     const staticExtradata = defaultAbiCoder.encode(
       ['address[]', 'uint256[]'],
-      [
-        [erc20Address, erc1155Address, protocol, creator],
-        [
-          erc1155Id,
-          erc20BuyPrice,
-          erc1155BuyDenominator,
-          sellerAmount,
-          protocolFees,
-          royaltiesFees,
-        ],
-      ]
+      [addresses, values]
     );
     const order = {
       registry: registry.address,
@@ -1152,6 +1190,7 @@ export const marketplaceFixture = async (
       ['address[]', 'uint256[]'],
       buyOrder.staticExtradata
     );
+
     // these checks are also performed within the static calls on StaticMarket, but we check here before going on chain
     if (erc1155Address != erc1155AddressOther)
       throw new Error("ERC1155 Addresses don't match on orders");
@@ -1171,7 +1210,7 @@ export const marketplaceFixture = async (
       throw new Error("Seller Amounts don't match on orders");
     if (!protocolFees.eq(protocolFeesOther))
       throw new Error("Protocol Fees amounts don't match on orders");
-    if (!royaltiesFees.eq(royaltiesFeesOther))
+    if (royaltiesFees && !royaltiesFees.eq(royaltiesFeesOther))
       throw new Error("Royalties Fees amounts don't match on orders");
 
     const firstData = ERC1155Interface.encodeFunctionData('safeTransferFrom', [
@@ -1182,26 +1221,37 @@ export const marketplaceFixture = async (
       '0x',
     ]);
 
-    const secondData = atomicizer.interface.encodeFunctionData('atomicize', [
-      [erc20Address, erc20Address, erc20Address],
-      [0, 0, 0],
-      [
-        ERC20Interface.encodeFunctionData('transferFrom', [
-          buyOrder.maker,
-          sellOrder.maker,
-          sellerAmount,
-        ]),
+    const transferCalls = [
+      ERC20Interface.encodeFunctionData('transferFrom', [
+        buyOrder.maker,
+        sellOrder.maker,
+        sellerAmount,
+      ]),
+    ];
+
+    if (protocolFees.gt(0)) {
+      transferCalls.push(
         ERC20Interface.encodeFunctionData('transferFrom', [
           buyOrder.maker,
           protocol,
           protocolFees,
-        ]),
+        ])
+      );
+    }
+
+    if (royaltiesFees && royaltiesFees.gt(0)) {
+      transferCalls.push(
         ERC20Interface.encodeFunctionData('transferFrom', [
           buyOrder.maker,
           creator,
           royaltiesFees,
-        ]),
-      ],
+        ])
+      );
+    }
+
+    const secondData = atomicizer.interface.encodeFunctionData('atomicize', [
+      new Array(transferCalls.length).fill(erc20Address),
+      transferCalls,
     ]);
 
     const firstCall = { target: erc1155Address, howToCall: 0, data: firstData };

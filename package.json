@@ -45,8 +45,6 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@axelar-network/interchain-token-service": "^1.2.4",
-    "@openzeppelin-4.9.6/contracts": "npm:@openzeppelin/contracts@4.9.6",
     "@openzeppelin/contracts": "5.0.1",
     "@prb/math": "^4.0.2",
     "cross-env": "^7.0.3",

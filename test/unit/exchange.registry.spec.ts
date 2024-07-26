@@ -20,6 +20,7 @@ import { randomHex } from '@utils/encoding';
 import { faucet } from '@utils/faucet';
 import { unseenFixture } from '@utils/fixtures';
 import { deployContract } from '@utils/helpers';
+import { clock, increaseTo } from '@utils/time';
 
 describe(`Exchange Registry - (Unseen v${process.env.VERSION})`, async function () {
   const { provider } = ethers;
@@ -128,14 +129,36 @@ describe(`Exchange Registry - (Unseen v${process.env.VERSION})`, async function 
     });
     it('only owner can grant authentication', async function () {
       await expect(
-        registry.connect(bob).grantAuthentication(marketplace.address)
+        registry.connect(bob).startGrantAuthentication(marketplace.address)
       ).to.be.revertedWithCustomError(registry, 'Unauthorized');
       await expect(
-        registry.grantAuthentication(marketplace.address)
-      ).to.be.revertedWithCustomError(registry, 'ContractAlreadyAllowed');
-      await expect(registry.grantAuthentication(bob.address))
+        registry.startGrantAuthentication(marketplace.address)
+      ).to.be.revertedWithCustomError(
+        registry,
+        'ContractAlreadyAllowedOrPending'
+      );
+      await registry.startGrantAuthentication(bob.address);
+      await expect(
+        registry.endGrantAuthentication(bob.address)
+      ).to.be.revertedWithCustomError(registry, 'InvalidContractState');
+      // increase time by half week
+      let nextTimestamp = (await clock.timestamp()).add(302400);
+      await increaseTo.timestamp(nextTimestamp);
+      await expect(
+        registry.endGrantAuthentication(bob.address)
+      ).to.be.revertedWithCustomError(registry, 'InvalidContractState');
+      // increase time by another half week
+      nextTimestamp = nextTimestamp.add(302400);
+      await increaseTo.timestamp(nextTimestamp);
+      await expect(registry.endGrantAuthentication(bob.address))
         .to.emit(registry, 'AuthGranted')
         .withArgs(bob.address);
+      await expect(
+        registry.startGrantAuthentication(bob.address)
+      ).to.be.revertedWithCustomError(
+        registry,
+        'ContractAlreadyAllowedOrPending'
+      );
     });
     it('only owner can revoke authentication', async function () {
       await expect(

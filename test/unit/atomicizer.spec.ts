@@ -49,7 +49,6 @@ describe(`Atomicizer - (Unseen v${process.env.VERSION})`, async function () {
   let amount: BigNumber;
 
   let targets: string[];
-  let values: BigNumberish[];
   let calldatas: string[];
 
   async function setupFixture() {
@@ -84,7 +83,6 @@ describe(`Atomicizer - (Unseen v${process.env.VERSION})`, async function () {
 
   beforeEach(async function () {
     targets = [mockERC20.address, mockERC1155.address, mockERC721.address];
-    values = [0, 0, 0];
 
     await mintAndApproveERC20(bob, atomicizer.address, erc20Amount);
     erc721Id = await mintAndApprove721(bob, atomicizer.address);
@@ -119,17 +117,15 @@ describe(`Atomicizer - (Unseen v${process.env.VERSION})`, async function () {
     it('should fail if arrays length mismatch', async function () {
       const slicedData = [...calldatas.splice(2, 1)];
       await expect(
-        atomicize({ targets, values, calldatas: slicedData })
+        atomicize({ targets, calldatas: slicedData })
       ).to.be.revertedWithCustomError(atomicizer, 'LengthsMismatch');
 
-      const slicedValues = [...values.splice(2, 1)];
       await expect(
-        atomicize({ targets, values: slicedValues, calldatas })
+        atomicize({ targets, calldatas })
       ).to.be.revertedWithCustomError(atomicizer, 'LengthsMismatch');
     });
     it('should not fail if all transactions gets executed', async function () {
-      await expect(atomicize({ targets, values, calldatas })).to.not.be
-        .rejected;
+      await expect(atomicize({ targets, calldatas })).to.not.be.rejected;
       expect(await mockERC20.balanceOf(alice.address)).to.eq(erc20Amount);
       expect(await mockERC721.ownerOf(erc721Id)).to.eq(alice.address);
       expect(await mockERC1155.balanceOf(alice.address, erc1155Id)).to.eq(
@@ -143,31 +139,8 @@ describe(`Atomicizer - (Unseen v${process.env.VERSION})`, async function () {
         erc721Id,
       ]);
       await expect(
-        atomicize({ targets, values, calldatas })
+        atomicize({ targets, calldatas })
       ).to.be.revertedWithCustomError(atomicizer, 'SubcallFailed');
-    });
-    it('can execute transactions with values', async function () {
-      await mockERC20.connect(bob).approve(delegateCaller.address, erc20Amount);
-      await mockERC721
-        .connect(bob)
-        .setApprovalForAll(delegateCaller.address, true);
-      await mockERC1155
-        .connect(bob)
-        .setApprovalForAll(delegateCaller.address, true);
-      const data = atomicizer.interface.encodeFunctionData('atomicize', [
-        targets,
-        [0, 0, 1],
-        calldatas,
-      ]);
-      await delegateCaller.delegateCall(atomicizer.address, data, { value: 1 });
-      expect(await mockERC20.balanceOf(alice.address)).to.eq(
-        erc20Amount.mul(2)
-      );
-      expect(await mockERC721.ownerOf(erc721Id)).to.eq(alice.address);
-      expect(await mockERC1155.balanceOf(alice.address, erc1155Id)).to.eq(
-        amount
-      );
-      expect(await provider.getBalance(mockERC721.address)).eq(1);
     });
   });
 });

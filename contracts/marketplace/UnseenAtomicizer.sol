@@ -20,34 +20,30 @@ $$ |  $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |      \$$$$$$  |  \$$$$  |\$$$$$$  |\$$$
  * @notice Atomicizer contract used to execute
  *         packed calls { ex: fees , royalties }
  */
-
 contract UnseenAtomicizer {
-    error LengthsMismatch(string reason);
+    // Error for mismatched lengths between addresses and calldatas
+    error LengthsMismatch();
+
+    // Error for failed sub-calls
     error SubcallFailed();
 
     /**
      * @notice Atomicize a series of calls
      * @param addrs     Addresses to call
-     * @param values    Values to send with each call
      * @param calldatas Calldata to send with each call
      */
     function atomicize(
         address[] calldata addrs,
-        uint256[] calldata values,
         bytes[] calldata calldatas
-    ) external payable {
+    ) external {
         uint256 length = addrs.length;
 
-        if (length != values.length) {
-            revert LengthsMismatch("Addresses & values lengths mismatch!");
-        }
-
         if (length != calldatas.length) {
-            revert LengthsMismatch("Addresses and calldata lengths mismatch!");
+            revert LengthsMismatch();
         }
 
         for (uint256 i; i < length; ) {
-            (bool success, ) = addrs[i].call{ value: values[i] }(calldatas[i]);
+            (bool success, ) = addrs[i].call(calldatas[i]);
             if (!success) {
                 revert SubcallFailed();
             }

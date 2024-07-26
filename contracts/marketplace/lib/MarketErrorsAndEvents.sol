@@ -116,6 +116,7 @@ interface MarketErrorsAndEvents {
      * @param hash The hash of the order.
      * @param registry The registry address.
      * @param maker The address of the maker.
+     * @param executer The address of the executer.
      * @param staticTarget The static target address.
      * @param staticSelector The static selector.
      * @param staticExtradata The static extradata.
@@ -129,6 +130,7 @@ interface MarketErrorsAndEvents {
         bytes32 indexed hash,
         address registry,
         address indexed maker,
+        address indexed executer,
         address staticTarget,
         bytes4 staticSelector,
         bytes staticExtradata,

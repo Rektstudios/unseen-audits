@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import { InterchainTokenStandard } from "@axelar-network/interchain-token-service/contracts/interchain-token/InterchainTokenStandard.sol";
-import { Minter } from "@axelar-network/interchain-token-service/contracts/utils/Minter.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { ERC20Pausable } from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
+import { ERC20Burnable } from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import { ERC20Permit, Nonces } from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import { ERC20Votes } from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import { Ownable } from "solady/src/auth/Ownable.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 /*
 
@@ -30,28 +29,12 @@ $$ |  $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |      \$$$$$$  |  \$$$$  |\$$$$$$  |\$$$
  */
 contract UnseenToken is
     Ownable,
-    InterchainTokenStandard,
-    Minter,
     ERC20,
     ERC20Pausable,
+    ERC20Burnable,
     ERC20Permit,
     ERC20Votes
 {
-    // Internal token ID
-    bytes32 internal tokenId;
-
-    // Immutable interchain token service address
-    address internal immutable interchainTokenService_;
-
-    // Error: Interchain token service address is zero
-    error InterchainTokenServiceAddressZero();
-
-    // Error: Token ID is zero
-    error TokenIdZero();
-
-    // Error: Token ID is already set
-    error TokenIdIsAlreadySet();
-
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
      * another (`to`) with onchain data.
@@ -59,8 +42,8 @@ contract UnseenToken is
      * Note that `value` may be zero.
      */
     event TransferWithData(
-        address from,
-        address to,
+        address indexed from,
+        address indexed to,
         uint256 value,
         string data
     );
@@ -71,25 +54,14 @@ contract UnseenToken is
      * @param _owner The owner address to set and receive tokens.
      */
     constructor(
-        address _owner,
-        address _interchainTokenServiceAddress,
-        uint256 _initialSupply
-    ) payable ERC20("Unseen Token", "UNCN") ERC20Permit("UNSEEN") {
-        if (_owner == address(0)) revert NewOwnerIsZeroAddress();
-
-        _initializeOwner(_owner);
-
-        if (_interchainTokenServiceAddress == address(0)) {
-            revert InterchainTokenServiceAddressZero();
-        }
-
-        interchainTokenService_ = _interchainTokenServiceAddress;
-
-        if (_initialSupply > _maxSupply()) {
-            revert ERC20ExceededSafeSupply(_initialSupply, _maxSupply());
-        }
-
-        if (_initialSupply > 0) _mint(_owner, _initialSupply);
+        address _owner
+    )
+        payable
+        ERC20("Unseen Token", "UNCN")
+        Ownable(_owner)
+        ERC20Permit("UNSEEN")
+    {
+        _mint(_owner, 1_000_000_000 ether);
     }
 
     /**
@@ -108,76 +80,6 @@ contract UnseenToken is
      */
     function unpause() external onlyOwner {
         _unpause();
-    }
-
-    /**
-     * @notice Initialize the bridge parmas.
-     *
-     * This can only be called by the contract owner and one time.
-     */
-    function init(bytes32 tokenId_, address tokenManager) external onlyOwner {
-        if (tokenId_ == bytes32(0)) revert TokenIdZero();
-        if (tokenId_ == tokenId) revert TokenIdIsAlreadySet();
-        tokenId = tokenId_;
-        _addMinter(tokenManager);
-    }
-
-    /**
-     * @notice Returns the interchain token service
-     * @return address The interchain token service contract
-     */
-    function interchainTokenService() public view override returns (address) {
-        return interchainTokenService_;
-    }
-
-    /**
-     * @notice Returns the tokenId for this token.
-     * @return bytes32 The token manager contract.
-     */
-    function interchainTokenId() public view override returns (bytes32) {
-        return tokenId;
-    }
-
-    /**
-     * @notice Function to mint new tokens.
-     * @dev Can only be called by the minter address.
-     * @param account The address that will receive the minted tokens.
-     * @param amount The amount of tokens to mint.
-     */
-    function mint(
-        address account,
-        uint256 amount
-    ) external onlyRole(uint8(Roles.MINTER)) {
-        _mint(account, amount);
-    }
-
-    /**
-     * @dev Destroys a `value` amount of tokens from the caller.
-     *
-     * See {ERC20-_burn}.
-     */
-    function burn(uint256 value) external {
-        _burn(_msgSender(), value);
-    }
-
-    /**
-     * @dev Destroys a `value` amount of tokens from `account`, deducting from
-     * the caller's allowance.
-     *
-     * See {ERC20-_burn} and {ERC20-allowance}.
-     *
-     * Requirements:
-     *
-     * - the caller must have allowance for ``accounts``'s tokens of at least
-     * `value`.
-     *
-     * - if caller has minter role , then we bypass allowance
-     */
-    function burn(address account, uint256 value) external {
-        if (!hasRole(account, uint8(Roles.MINTER))) {
-            _spendAllowance(account, _msgSender(), value);
-        }
-        _burn(account, value);
     }
 
     /**
@@ -262,14 +164,9 @@ contract UnseenToken is
         return super.nonces(_owner);
     }
 
-    function _spendAllowance(
-        address sender,
-        address spender,
-        uint256 amount
-    ) internal override(ERC20, InterchainTokenStandard) {
-        ERC20._spendAllowance(sender, spender, amount);
-    }
-
+    /**
+     * @dev Supply is capped.
+     */
     function _maxSupply() internal view virtual override returns (uint256) {
         return 1_000_000_000 ether;
     }

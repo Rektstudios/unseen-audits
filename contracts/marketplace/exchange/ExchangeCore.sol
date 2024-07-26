@@ -398,6 +398,7 @@ contract ExchangeCore is
             hash,
             order.registry,
             order.maker,
+            order.executer,
             order.staticTarget,
             order.staticSelector,
             order.staticExtradata,

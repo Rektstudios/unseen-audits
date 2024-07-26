@@ -7,26 +7,6 @@
   resolved "https://registry.yarnpkg.com/@adraffy/ens-normalize/-/ens-normalize-1.10.0.tgz#d2a39395c587e092d77cbbc80acf956a54f38bf7"
   integrity sha512-nA9XHtlAkYfJxY7bce8DcN7eKxWWCWkU+1GR9d+U6MbNpfwQp8TI7vqOsBsMcHoT4mBu2kypKoSKnghEzOOq5Q==
 
-"@axelar-network/axelar-cgp-solidity@6.2.1":
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/@axelar-network/axelar-cgp-solidity/-/axelar-cgp-solidity-6.2.1.tgz#770d6763802a3233c519860f3301154f1ef99170"
-  integrity sha512-0RaxLYmsp3elXBytn7+eZUil1KFS6jjHR/ECrN/3IC7TeTDPUYunyy6JDxCdNYNtiD6EKgUAfQ7G4DrBb6hRxg==
-  dependencies:
-    "@axelar-network/axelar-gmp-sdk-solidity" "5.6.4"
-
-"@axelar-network/axelar-gmp-sdk-solidity@5.6.4":
-  version "5.6.4"
-  resolved "https://registry.yarnpkg.com/@axelar-network/axelar-gmp-sdk-solidity/-/axelar-gmp-sdk-solidity-5.6.4.tgz#fe224ff039f86f1cbf72d9b53339a8354f531b65"
-  integrity sha512-PQjV+HeJynmSRMhyM3SexwnbFNruSaiRUeNCWjV8/7CkdPsDqypoqIXVRVU8Zk92DUUHeqZZzL/3qP2LYuvlnA==
-
-"@axelar-network/interchain-token-service@^1.2.4":
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/@axelar-network/interchain-token-service/-/interchain-token-service-1.2.4.tgz#99435fbf9a3f95d7a2c2b943b05c507838afc72f"
-  integrity sha512-Sgw2M4VzW5hjL9TBe2ljL5wo+paYqlL2XNQlq1dyaDAD6E7PG1MQ+0U44QnfJfhhAwcqZtKQmb92ZNwV+BEdVw==
-  dependencies:
-    "@axelar-network/axelar-cgp-solidity" "6.2.1"
-    "@axelar-network/axelar-gmp-sdk-solidity" "5.6.4"
-
 "@babel/code-frame@^7.0.0":
   version "7.24.2"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.24.2.tgz#718b4b19841809a58b29b68cde80bc5e1aa6d9ae"
@@ -711,11 +691,6 @@
     semver "^6.3.0"
     table "^6.8.0"
     undici "^5.14.0"
-
-"@openzeppelin-4.9.6/contracts@npm:@openzeppelin/contracts@4.9.6":
-  version "4.9.6"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.6.tgz#2a880a24eb19b4f8b25adc2a5095f2aa27f39677"
-  integrity sha512-xSmezSupL+y9VkHZJGDoCBpmnB2ogM13ccaYDWqJTfS3dbuHkgjuwDFUmaFauBCboQMGB/S5UqUl2y54X99BmA==
 
 "@openzeppelin/contracts@5.0.1":
   version "5.0.1"

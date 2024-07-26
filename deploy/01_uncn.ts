@@ -15,11 +15,7 @@ const deployFunction: DeployFunction = async ({
   log(
     `Deploying Unseen governance token on ${network.name} Chain and waiting for confirmations...`
   );
-  const args = [
-    networkConfigured.multisigWallet || deployer,
-    uncnConfig.interchainTokenServiceAddress || deployer,
-    uncnConfig.initialSupply,
-  ];
+  const args = [networkConfigured.multisigWallet || deployer];
   const unseenToken = await deploy('UnseenToken', {
     from: deployer,
     args,

@@ -10,16 +10,14 @@ export const atomicizerFixture = async (owner: Wallet) => {
   );
   const atomicize = async ({
     targets,
-    values,
     calldatas,
     options = {},
   }: {
     targets: string[];
-    values: BigNumberish[];
     calldatas: string[];
     options?: {};
   }) => {
-    return atomicizer.atomicize(targets, values, calldatas, options);
+    return atomicizer.atomicize(targets, calldatas, options);
   };
 
   return {

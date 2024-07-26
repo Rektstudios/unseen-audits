@@ -508,7 +508,34 @@ describe(`Exchange Advanced - (Unseen v${process.env.VERSION})`, async function 
       ).to.be.rejectedWith("ERC1155 token IDs don't match on orders");
     });
 
-    it('matches ERC1155 <> ERC20 order, 1 fill with royalties and protocol fees', async () => {
+    it('matches ERC1155 <> ERC20 order, 1 fill with only royalties', async () => {
+      const price = BigNumber.from(10000);
+
+      await marketplace.changeProtocolFee(0);
+
+      return anyERC1155ForERC20WithRoyaltiesFees({
+        tokenId: 5,
+        sellAmount: 1,
+        sellingPrice: price,
+        buyingPrice: price,
+        buyAmount: 1,
+        erc1155MintAmount: 1,
+        erc20MintAmount: price,
+        maker: bob,
+        taker: alice,
+        sender,
+        protocolFees: {
+          treasury,
+          pFee: 0,
+        },
+        royalties: {
+          feebps: 1000,
+          creator: creator.address,
+        },
+      });
+    });
+
+    it('matches ERC1155 <> ERC20 order, 1 fill with only protocol fees', async () => {
       const price = BigNumber.from(10000);
 
       return anyERC1155ForERC20WithRoyaltiesFees({
@@ -527,7 +554,35 @@ describe(`Exchange Advanced - (Unseen v${process.env.VERSION})`, async function 
           pFee,
         },
         royalties: {
-          feebps: 500,
+          feebps: 0,
+          creator: creator.address,
+        },
+      });
+    });
+
+    it('matches ERC1155 <> ERC20 order, 1 fill with royalties and protocol fees', async () => {
+      const price = BigNumber.from(10000);
+
+      // @note added to reset protocol fees
+      await marketplace.changeProtocolFee(500);
+
+      return anyERC1155ForERC20WithRoyaltiesFees({
+        tokenId: 5,
+        sellAmount: 1,
+        sellingPrice: price,
+        buyingPrice: price,
+        buyAmount: 1,
+        erc1155MintAmount: 1,
+        erc20MintAmount: price,
+        maker: bob,
+        taker: alice,
+        sender,
+        protocolFees: {
+          treasury,
+          pFee,
+        },
+        royalties: {
+          feebps: 1000,
           creator: creator.address,
         },
       });
@@ -555,7 +610,7 @@ describe(`Exchange Advanced - (Unseen v${process.env.VERSION})`, async function 
           pFee,
         },
         royalties: {
-          feebps: 500,
+          feebps: 1000,
           creator: creator.address,
         },
       });
@@ -1032,7 +1087,31 @@ describe(`Exchange Advanced - (Unseen v${process.env.VERSION})`, async function 
       ).to.be.rejectedWith("ERC721 token IDs don't match on orders");
     });
 
-    it('StaticMarket: matches ERC721 <> ERC20 order with royalties and fees', async () => {
+    it('StaticMarket: matches ERC721 <> ERC20 order only royalties', async () => {
+      const price = BigNumber.from(15000);
+
+      await marketplace.changeProtocolFee(0);
+
+      return ERC721ForERC20WithRoyaltiesFees({
+        tokenId: 10,
+        sellingPrice: price,
+        buyingPrice: price,
+        erc20MintAmount: price,
+        maker: bob,
+        taker: alice,
+        sender,
+        protocolFees: {
+          treasury,
+          pFee: 0,
+        },
+        royalties: {
+          creator: creator.address,
+          feebps: 1000,
+        },
+      });
+    });
+
+    it('StaticMarket: matches ERC721 <> ERC20 order with only protocol fees', async () => {
       const price = BigNumber.from(15000);
 
       return ERC721ForERC20WithRoyaltiesFees({
@@ -1049,7 +1128,32 @@ describe(`Exchange Advanced - (Unseen v${process.env.VERSION})`, async function 
         },
         royalties: {
           creator: creator.address,
-          feebps: 500,
+          feebps: 0,
+        },
+      });
+    });
+
+    it('StaticMarket: matches ERC721 <> ERC20 order with royalties and fees', async () => {
+      const price = BigNumber.from(15000);
+
+      // @note added to reset protocol fees
+      await marketplace.changeProtocolFee(500);
+
+      return ERC721ForERC20WithRoyaltiesFees({
+        tokenId: 10,
+        sellingPrice: price,
+        buyingPrice: price,
+        erc20MintAmount: price,
+        maker: bob,
+        taker: alice,
+        sender,
+        protocolFees: {
+          treasury,
+          pFee,
+        },
+        royalties: {
+          creator: creator.address,
+          feebps: 1000,
         },
       });
     });

@@ -20,8 +20,7 @@
       "@fixtures": ["test/utils/fixtures/index"],
       "@fixtures/*": ["test/utils/fixtures/*"],
       "@unit/*": ["test/unit/*"],
-      "@openzeppelin": ["node_modules/@openzeppelin"],
-      "@openzeppelin-4.9.6": ["node_modules/@openzeppelin-4.9.6"]
+      "@openzeppelin": ["node_modules/@openzeppelin"]
     }
   },
   "include": [

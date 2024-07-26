@@ -16,8 +16,19 @@ contract ProxyRegistry is Ownable, ProxyRegistryInterface {
     /* Authenticated proxies by user. */
     mapping(address => AuthenticatedProxy) public override proxies;
 
+    /* Contracts pending access. */
+    mapping(address => uint256) public pending;
+
     /* Contracts allowed to call those proxies. */
     mapping(address => bool) public contracts;
+
+    /* Delay period for adding an authenticated contract.
+       This mitigates a particular class of potential compromise to the Unseen Registry Owner (which owns this registry).
+       A malicious but rational attacker could grant themselves access to all the proxy contracts.
+       A delay period renders this attack nonthreatening - given one week, if that happened, users would have
+       plenty of time to notice and revoke access.
+    */
+    uint256 public DELAY_PERIOD = 1 weeks;
 
     /**
      * @notice Error thrown when providing zero address.
@@ -26,9 +37,9 @@ contract ProxyRegistry is Ownable, ProxyRegistryInterface {
 
     /**
      * @notice Error thrown when trying to grant authentication
-     *         to a contract that is already authenticated.
+     *         to a contract that is already authenticated or pending.
      */
-    error ContractAlreadyAllowed();
+    error ContractAlreadyAllowedOrPending();
 
     /**
      * @notice Error thrown when trying to revoke authentication
@@ -61,6 +72,12 @@ contract ProxyRegistry is Ownable, ProxyRegistryInterface {
     event AuthGranted(address indexed addr);
 
     /**
+     * @notice Emitted when attempting to Grant auth for an allowed contract or
+     *         before the delay_period has passed.
+     */
+    error InvalidContractState();
+
+    /**
      * @notice Emitted when authentication is revoked from a contract.
      * @param addr The address of the contract that has had its authentication revoked.
      */
@@ -74,16 +91,32 @@ contract ProxyRegistry is Ownable, ProxyRegistryInterface {
     event ProxyAccessTransferred(address indexed from, address indexed to);
 
     /**
-     * Enable access for specified contract.
+     * Enable access for specified contract. Subject to delay period.
      *
      * @dev ProxyRegistry owner only
      * @param addr Address to which to grant permissions
      */
-    function grantAuthentication(address addr) external onlyOwner {
+    function startGrantAuthentication(address addr) external onlyOwner {
         if (addr == address(0)) revert AddressCannotBeZero();
-        if (contracts[addr]) {
-            revert ContractAlreadyAllowed();
+        if (contracts[addr] || pending[addr] != 0) {
+            revert ContractAlreadyAllowedOrPending();
         }
+        pending[addr] = block.timestamp;
+    }
+
+    /**
+     * End the process to enable access for specified contract after delay period has passed.
+     *
+     * @dev ProxyRegistry owner only
+     * @param addr Address to which to grant permissions
+     */
+    function endGrantAuthentication(address addr) external onlyOwner {
+        if (
+            contracts[addr] ||
+            pending[addr] == 0 ||
+            (pending[addr] + DELAY_PERIOD) >= block.timestamp
+        ) revert InvalidContractState();
+        pending[addr] = 0;
         contracts[addr] = true;
 
         emit AuthGranted(addr);

@@ -185,7 +185,7 @@ describe(`The Generates Public Mint - (Unseen v${process.env.VERSION})`, async f
       // Set end time in the past.
       await theGeneratesInterface.updatePublicDrop({
         ...parameters,
-        endTime: Math.round(Date.now() / 1000) - 1000,
+        endTime: Math.round(Date.now() / 1000) - 999,
       });
 
       // Mint public with payer for minter.

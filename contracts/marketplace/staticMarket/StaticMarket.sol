@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.26;
 
 import { ArrayUtils } from "../../lib/ArrayUtils.sol";
@@ -324,9 +323,9 @@ contract StaticMarket {
             _addrs,
             (address, address, address)
         );
-        (address[] memory addrs, , bytes[] memory calldatas) = abi.decode(
+        (address[] memory addrs, bytes[] memory calldatas) = abi.decode(
             data[4:],
-            (address[], uint256[], bytes[])
+            (address[], bytes[])
         );
         uint256 addrsLength = addrs.length;
         for (uint256 i; i < addrsLength; ) {

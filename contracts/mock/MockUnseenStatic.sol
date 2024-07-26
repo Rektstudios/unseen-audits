@@ -39,6 +39,9 @@ contract MockUnseenStatic {
     string constant ERR_EXCEEDS_MAX_FILL = "New fill exceeds maximum fill";
     string constant ERR_WRONG_RATIO = "Incorrect token ratio";
     string constant ERR_PRICE_MISMATCH = "Price mismatch";
+    string constant ERR_PFEE_RECIPIENT_MISMATCH = "Fee Recipient mismatch";
+    string constant ERR_PFEE_AMOUNT_MISMATCH = "Fee amount mismatch";
+    string constant ERR_ERC20_ADDRESSES_MISMATCH = "assets mismatch";
 
     /**
      * @notice Constructor
@@ -183,10 +186,13 @@ contract MockUnseenStatic {
             3
         );
         if (uints[0] > 0) {
-            require(tokenGiveGet[2] == addresses[6], "");
+            require(
+                tokenGiveGet[2] == addresses[6],
+                ERR_PFEE_RECIPIENT_MISMATCH
+            );
             require(
                 tokenIdAndNumeratorDenominator[4] == (uints[0] * sum) / 10_000,
-                ""
+                ERR_PFEE_AMOUNT_MISMATCH
             );
         }
         uint256 new_fill = (uints[2] + erc1155Amount);
@@ -239,10 +245,13 @@ contract MockUnseenStatic {
             3
         );
         if (uints[0] > 0) {
-            require(tokenGiveGet[2] == addresses[6], "");
+            require(
+                tokenGiveGet[2] == addresses[6],
+                ERR_PFEE_RECIPIENT_MISMATCH
+            );
             require(
                 tokenIdAndNumeratorDenominator[4] == (uints[0] * sum) / 10_000,
-                ""
+                ERR_PFEE_AMOUNT_MISMATCH
             );
         }
         uint256 new_fill = (uints[2] + sum);
@@ -590,8 +599,14 @@ contract MockUnseenStatic {
             2
         );
         if (uints[0] > 0) {
-            require(tokenGiveGet[2] == addresses[6], "");
-            require(tokenIdAndPrice[3] == (uints[0] * sum) / 10_000, "");
+            require(
+                tokenGiveGet[2] == addresses[6],
+                ERR_PFEE_RECIPIENT_MISMATCH
+            );
+            require(
+                tokenIdAndPrice[3] == (uints[0] * sum) / 10_000,
+                ERR_PFEE_AMOUNT_MISMATCH
+            );
         }
         require(tokenIdAndPrice[1] == sum, ERR_PRICE_MISMATCH);
         checkERC721Side(data, addresses[1], addresses[4], tokenIdAndPrice[0]);
@@ -624,8 +639,14 @@ contract MockUnseenStatic {
             2
         );
         if (uints[0] > 0) {
-            require(tokenGiveGet[2] == addresses[6], "");
-            require(tokenIdAndPrice[3] == (uints[0] * sum) / 10_000, "");
+            require(
+                tokenGiveGet[2] == addresses[6],
+                ERR_PFEE_RECIPIENT_MISMATCH
+            );
+            require(
+                tokenIdAndPrice[3] == (uints[0] * sum) / 10_000,
+                ERR_PFEE_AMOUNT_MISMATCH
+            );
         }
         checkERC721Side(
             counterdata,
@@ -782,14 +803,13 @@ contract MockUnseenStatic {
             _addrs,
             (address, address, address)
         );
-        (address[] memory addrs, , bytes[] memory calldatas) = abi.decode(
+        (address[] memory addrs, bytes[] memory calldatas) = abi.decode(
             data[4:],
-            (address[], uint256[], bytes[])
+            (address[], bytes[])
         );
-
         uint256 addrsLength = addrs.length;
         for (uint256 i; i < addrsLength; ) {
-            require(asset == addrs[i], "");
+            require(asset == addrs[i], ERR_ERC20_ADDRESSES_MISMATCH);
             checkERC20Side(
                 calldatas[i],
                 taker,

@@ -24,7 +24,7 @@ export const globalMakerSigMakerOffsets = [
     offset: 4,
   },
   {
-    sig: id('atomicize(address[],uint256[],bytes[])').substring(0, 10),
+    sig: id('atomicize(address[],bytes[])').substring(0, 10),
     offset: 4,
   },
 ];
@@ -49,7 +49,7 @@ export const MultiERC20ForERC721s = '0x621d5ac7';
 export const anyNFTForNFT = '0x002811ec';
 export const noChecks_ = '0x57a5b31d'; // with params
 export const noChecks = '0xd10b5256';
-export const atomicize = '0xb1f1709c';
+export const atomicize = '0x3083a708';
 
 export const ERC20Interface = new Interface(ERC20ABI.abi);
 export const ERC721Interface = new Interface(ERC721ABI.abi);

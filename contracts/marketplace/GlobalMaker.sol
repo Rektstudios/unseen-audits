@@ -83,10 +83,10 @@ contract GlobalMaker is ERC1271Mod {
 
         if (signer == address(0)) return SIGINVALID;
 
-        if (sig == 0xb1f1709c) {
-            (, , bytes[] memory calldatas) = abi.decode(
+        if (sig == 0x3083a708) {
+            (, bytes[] memory calldatas) = abi.decode(
                 _callData[4:],
-                (address[], uint256[], bytes[])
+                (address[], bytes[])
             );
             uint256 calldatasLength = calldatas.length;
             for (uint256 i; i < calldatasLength; ) {
