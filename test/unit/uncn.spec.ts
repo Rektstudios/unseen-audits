@@ -18,7 +18,7 @@ import { permit } from 'eip-712-types/permit';
 
 const { parseEther } = ethers.utils;
 
-describe.only(`UNCN governance token - (Unseen v${process.env.VERSION})`, async function () {
+describe(`UNCN governance token - (Unseen v${process.env.VERSION})`, async function () {
   const { provider } = ethers;
 
   let uncn: UnseenToken;
