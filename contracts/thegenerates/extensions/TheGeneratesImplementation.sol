@@ -15,7 +15,7 @@ import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 
 /**
  * @title  TheGeneratesImplementation
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice A helper contract that contains the implementation logic for
  *         TheGenerates, to help reduce contract size
  *         on the token contract itself.

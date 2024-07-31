@@ -13,7 +13,7 @@ import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 
 /**
  * @title  TGenContract
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice An ERC721 token contract based on ERC721A that can mint NFTs.
  */
 contract TGenContract is ContractMetadata {

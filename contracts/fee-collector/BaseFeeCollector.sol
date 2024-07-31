@@ -8,7 +8,7 @@ import { IBaseFeeCollectorEventsAndErrors } from "../interfaces/IBaseFeeCollecto
 
 /**
  * @title  BaseFeeCollector
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice BaseFeeCollector allows for withdrawal of the native token and all ERC20 standard tokens.
  *         The contract inherits Ownable to allow for ownership modifiers.
  *

@@ -11,7 +11,7 @@ import { Lockup } from "../types/DataTypes.sol";
 
 /**
  * @title  VestingLockup
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice Manages the creation and interaction of
  *         UnseenVesting schedules as ERC-721 (NFTs).
  *         It also provides functionality to cancel,

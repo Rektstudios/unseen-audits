@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 
 /**
  * @title  EIP1271
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  */
 abstract contract ERC1271Mod {
     // bytes4(keccak256("isValidSignature(bytes,bytes,bytes)")

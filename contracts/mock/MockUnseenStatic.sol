@@ -6,7 +6,7 @@ import { AuthenticatedProxy } from "../marketplace/registry/AuthenticatedProxy.s
 
 /**
  * @title MockUnseenStatic
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice Static call functions
  * @dev   This contract is intended solely for use in testing
  *        environments. It includes functionality that may be used

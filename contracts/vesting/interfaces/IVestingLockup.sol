@@ -8,7 +8,7 @@ import { IUnseenVestingNFTDescriptor } from "./IUnseenVestingNFTDescriptor.sol";
 
 /**
  * @title  IVestingLockup
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice Interface for Vesting Lockup Contract
  */
 interface IVestingLockup is IERC721Metadata {

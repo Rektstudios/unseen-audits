@@ -5,7 +5,7 @@ import { ProxyRegistry } from "./ProxyRegistry.sol";
 
 /**
  * @title  AuthenticatedProxy
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice Proxy contract to hold access to assets on behalf of
  *         a user (e.g. ERC20 approve) and execute calls under particular conditions.
  */

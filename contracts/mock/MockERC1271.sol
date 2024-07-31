@@ -6,7 +6,7 @@ import { ERC1271 } from "../lib/ERC1271.sol";
 
 /**
  * @title  MockERC1271
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice erc1271 contract for unit tests
  */
 contract MockERC1271 is ERC1271 {

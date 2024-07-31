@@ -5,7 +5,7 @@ import { AuthenticatedProxy } from "./AuthenticatedProxy.sol";
 
 /**
  * @title  ProxyRegistryInterface
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  */
 interface ProxyRegistryInterface {
     function authProxyImplementation() external returns (address);

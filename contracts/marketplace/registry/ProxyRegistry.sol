@@ -7,7 +7,7 @@ import { ProxyRegistryInterface, AuthenticatedProxy } from "./ProxyRegistryInter
 
 /**
  * @title  ProxyRegistry
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  */
 contract ProxyRegistry is Ownable, ProxyRegistryInterface {
     /* Proxy implementation contract. Must be initialized. */

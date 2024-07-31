@@ -16,7 +16,7 @@ contract MockDelegateCaller {
     function delegateCall(
         address target,
         bytes calldata data
-    ) external payable returns (bytes memory) {
+    ) external returns (bytes memory) {
         (bool success, bytes memory returndata) = target.delegatecall(data);
         return verifyCallResultFromTarget(target, success, returndata);
     }

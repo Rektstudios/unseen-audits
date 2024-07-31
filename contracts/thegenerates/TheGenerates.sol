@@ -19,7 +19,7 @@ $$ |  $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |      \$$$$$$  |  \$$$$  |\$$$$$$  |\$$$
 
 /**
  * @title  TheGenerates
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice An ERC721 token contract based on ERC721A that can mint NFTs.
  *         Implements Limit Break's Creator Token Standards transfer
  *         validation for royalty enforcement.

@@ -26,7 +26,7 @@ $$ |  $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |      \$$$$$$  |  \$$$$  |\$$$$$$  |\$$$
 
 /**
  * @title  TheGeneratesConfigurer
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice A helper contract to configure TheGenerates parameters.
  */
 contract TheGeneratesConfigurer is TheGeneratesImplementation {

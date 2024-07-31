@@ -30,7 +30,7 @@ $$ |  $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |      \$$$$$$  |  \$$$$  |\$$$$$$  |\$$$
 
 /**
  * @title  UnseenVesting
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice Manages UNCN vesting securely.
  *         Ensures fair, scheduled distribution to recipients.
  */

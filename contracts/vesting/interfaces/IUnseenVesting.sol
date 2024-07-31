@@ -7,7 +7,7 @@ import { IVestingLockup } from "./IVestingLockup.sol";
 
 /**
  * @title  IUnseenVesting
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice Creates and manages dynamic vesting schedules.
  */
 interface IUnseenVesting is IVestingLockup {

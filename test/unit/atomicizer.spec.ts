@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ethers, network } from 'hardhat';
 
 import type { UnseenFixtures } from '@utils/fixtures';
-import type { BigNumber, BigNumberish, Wallet } from 'ethers';
+import type { BigNumber, Wallet } from 'ethers';
 
 import {
   type MockDelegateCaller,
@@ -141,6 +141,27 @@ describe(`Atomicizer - (Unseen v${process.env.VERSION})`, async function () {
       await expect(
         atomicize({ targets, calldatas })
       ).to.be.revertedWithCustomError(atomicizer, 'SubcallFailed');
+    });
+    it('can delegate transactions to atomicizer', async function () {
+      await mockERC20.connect(bob).approve(delegateCaller.address, erc20Amount);
+      await mockERC721
+        .connect(bob)
+        .setApprovalForAll(delegateCaller.address, true);
+      await mockERC1155
+        .connect(bob)
+        .setApprovalForAll(delegateCaller.address, true);
+      const data = atomicizer.interface.encodeFunctionData('atomicize', [
+        targets,
+        calldatas,
+      ]);
+      await delegateCaller.delegateCall(atomicizer.address, data);
+      expect(await mockERC20.balanceOf(alice.address)).to.eq(
+        erc20Amount.mul(2)
+      );
+      expect(await mockERC721.ownerOf(erc721Id)).to.eq(alice.address);
+      expect(await mockERC1155.balanceOf(alice.address, erc1155Id)).to.eq(
+        amount
+      );
     });
   });
 });

@@ -18,7 +18,7 @@ $$ |  $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |      \$$$$$$  |  \$$$$  |\$$$$$$  |\$$$
 
 /**
  * @title  UnseenRegistry
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice Registry contract
  */
 contract UnseenRegistry is ProxyRegistry {

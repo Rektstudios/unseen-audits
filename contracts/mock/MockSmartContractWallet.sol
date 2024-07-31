@@ -23,7 +23,7 @@ contract ProxyInterface {
 
 /**
  * @title  MockSmartContractWallet
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @dev    Mock Smart contract wallets, proxies some calls an EOA wallet would make to setup on Unseen.
  */
 contract MockSmartContractWallet {

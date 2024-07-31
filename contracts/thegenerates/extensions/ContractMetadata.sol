@@ -17,7 +17,7 @@ import { ERC2981 } from "solady/src/tokens/ERC2981.sol";
 
 /**
  * @title  ContractMetadata
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice A token contract that extends ERC-721
  *         with additional metadata and ownership capabilities.
  */
@@ -88,6 +88,7 @@ contract ContractMetadata is
     function releaseToken(uint256 tokenId) external override {
         _releaseToken(tokenId);
     }
+    
     /**
      * @notice Sets the base URI for the token metadata and emits an event.
      *

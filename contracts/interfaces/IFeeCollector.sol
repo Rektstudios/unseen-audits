@@ -7,7 +7,7 @@ interface IWrappedNativeToken {
 
 /**
  * @title  FeeCollectorInterface
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice FeeCollectorInterface contains all external function
  *         INTERFACES for the fee collector implementation.
  */

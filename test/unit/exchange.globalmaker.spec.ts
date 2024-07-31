@@ -538,30 +538,29 @@ describe(`Exchange Global Maker - (Unseen v${process.env.VERSION})`, async funct
         sellAmount
       );
 
-      const { order: sellOrder, signature: sellSig } =
-        await placeAsk<'ERC1155Fees'>({
-          maker: bob,
-          executer: globalMaker.address,
-          tokenType: 'ERC1155Fees',
-          tokenAddress: mockERC1155.address,
-          tokenId: 5,
-          erc20Address: mockERC20.address,
-          erc20SellPrice: sellingPrice,
-          expirationTime: BigNumber.from(0),
-          optionalParams: {
-            erc1155Amount: sellAmount,
-            erc1155ratio: 1,
-            sellerAmount,
-            protocolFees: {
-              treasury,
-              pFee: protocolFeesAmount,
-            },
-            royalties: {
-              creator: creator.address,
-              feebps: royaltiesFeesAmount,
-            },
+      const { order: sellOrder } = await placeAsk<'ERC1155Fees'>({
+        maker: bob,
+        executer: globalMaker.address,
+        tokenType: 'ERC1155Fees',
+        tokenAddress: mockERC1155.address,
+        tokenId: 5,
+        erc20Address: mockERC20.address,
+        erc20SellPrice: sellingPrice,
+        expirationTime: BigNumber.from(0),
+        optionalParams: {
+          erc1155Amount: sellAmount,
+          erc1155ratio: 1,
+          sellerAmount,
+          protocolFees: {
+            treasury,
+            pFee: protocolFeesAmount,
           },
-        });
+          royalties: {
+            creator: creator.address,
+            feebps: royaltiesFeesAmount,
+          },
+        },
+      });
 
       const { order: buyOrder, signature: buySig } =
         await placeBid<'ERC1155Fees'>({

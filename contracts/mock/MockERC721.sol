@@ -6,7 +6,7 @@ import { ERC721A } from "erc721a/contracts/ERC721A.sol";
 
 /**
  * @title  MockERC721
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice erc721a contract for unit tests
  */
 contract MockERC721 is ERC721A("MockERC721", "MOCK") {

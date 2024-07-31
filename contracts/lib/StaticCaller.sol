@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 
 /**
  * @title  StaticCaller
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  */
 abstract contract StaticCaller {
     function staticCall(

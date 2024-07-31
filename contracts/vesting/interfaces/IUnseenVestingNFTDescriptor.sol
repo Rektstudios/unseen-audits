@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 /**
  * @title  IUnseenVestingNFTDescriptor
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice This contract generates the URI describing
  *         Unseen vesting schedules NFTs.
  */

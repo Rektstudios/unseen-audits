@@ -25,7 +25,7 @@ $$ |  $$ |\$$$$$$$\ $$ | \$$\   \$$$$  |      \$$$$$$  |  \$$$$  |\$$$$$$  |\$$$
 
 /**
  * @title  UnseenVestingNFTDescriptor
- * @author decapitator (0xdecapitator)
+ * @author decapitator (0xdecapitator.eth)
  * @notice This contract generates the URI describing
  *         UnseenVesting schedules NFTs
  */
