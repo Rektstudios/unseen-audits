@@ -57,7 +57,7 @@ contract UnseenToken is
         address _owner
     )
         payable
-        ERC20("Unseen Token", "UNCN")
+        ERC20("Unseen", "UNCN")
         Ownable(_owner)
         ERC20Permit("UNSEEN")
     {

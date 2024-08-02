@@ -117,7 +117,6 @@ library NFTSVG {
                 generateDefs(vars.cards),
                 generateFloatingText(
                     params.unseenVestingAddress,
-                    params.vestingModel,
                     params.uncnAddress,
                     params.uncnSymbol
                 ),
@@ -148,7 +147,6 @@ library NFTSVG {
 
     function generateFloatingText(
         string memory unseenVestingAddress,
-        string memory vestingModel,
         string memory uncnAddress,
         string memory uncnSymbol
     ) internal pure returns (string memory) {
@@ -160,8 +158,7 @@ library NFTSVG {
                     text: string.concat(
                         unseenVestingAddress,
                         unicode" • ",
-                        "Unseen Vesting ",
-                        vestingModel
+                        "Unseen Vesting"
                     )
                 }),
                 SVGElements.floatingText({
@@ -169,8 +166,7 @@ library NFTSVG {
                     text: string.concat(
                         unseenVestingAddress,
                         unicode" • ",
-                        "Unseen Vesting ",
-                        vestingModel
+                        "Unseen Vesting"
                     )
                 }),
                 SVGElements.floatingText({

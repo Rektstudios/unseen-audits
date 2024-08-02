@@ -310,7 +310,7 @@ contract UnseenVestingNFTDescriptor is IUnseenVestingNFTDescriptor {
         string memory vestingModel,
         string memory scheduleId
     ) internal pure returns (string memory) {
-        return string.concat("Unseen Vesting ", vestingModel, " #", scheduleId);
+        return string.concat(vestingModel, " #", scheduleId);
     }
 
     /**
