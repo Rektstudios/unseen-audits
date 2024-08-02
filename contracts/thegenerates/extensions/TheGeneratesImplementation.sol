@@ -20,7 +20,6 @@ import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
  *         TheGenerates, to help reduce contract size
  *         on the token contract itself.
  */
-
 contract TheGeneratesImplementation is ErrorsAndEvents {
     using TheGeneratesStorage for TheGeneratesStorage.Layout;
 

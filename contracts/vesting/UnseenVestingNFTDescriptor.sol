@@ -282,9 +282,8 @@ contract UnseenVestingNFTDescriptor is IUnseenVestingNFTDescriptor {
     ) internal pure returns (string memory) {
         return
             string.concat(
-                "This NFT represents a vesting schedule in Unseen Vesting ",
-                vestingModel,
-                " contract. The owner of this NFT can withdraw the vested uncn tokens, which are denominated in ",
+                "This NFT represents a vesting schedule in Unseen Vesting contract.",
+                " The owner of this NFT can withdraw the vested uncn tokens, which are denominated in ",
                 uncnSymbol,
                 ".\\n\\n- Schedule ID: ",
                 scheduleId,
