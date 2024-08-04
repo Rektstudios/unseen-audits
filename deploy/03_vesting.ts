@@ -17,7 +17,7 @@ const deployFunction: DeployFunction = async ({
   const args = [
     deployer,
     vestingDescriptor.address,
-    5,
+    300,
     uncn.address,
   ];
   const vesting = await deploy('UnseenVesting', {

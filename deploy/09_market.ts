@@ -12,6 +12,7 @@ const deployFunction: DeployFunction = async ({
   const { deploy, log, get } = deployments;
   const { deployer } = await getNamedAccounts();
   const registry = await get('UnseenRegistry');
+  const feeCollector = await get('FeeCollector');
   const networkConfigured = await (await networkConfig())[network.name]();
   const config = networkConfigured.marketplace;
   log('----------------------------------------------------');
@@ -21,7 +22,7 @@ const deployFunction: DeployFunction = async ({
   const args = [
     [registry.address],
     networkConfigured.multisigWallet || deployer,
-    deployer,
+    feeCollector.address,
     config.feesBps,
   ];
   const marketplace = await deploy('UnseenExchange', {
