@@ -164,11 +164,7 @@ contract ProxyRegistry is Ownable, ProxyRegistryInterface {
         proxy = AuthenticatedProxy(
             Clones.cloneDeterministic(authProxyImplementation, cloneSalt)
         );
-        AuthenticatedProxy(proxy).initialize(
-            user,
-            this,
-            authProxyImplementation
-        );
+        AuthenticatedProxy(proxy).initialize(user);
         proxies[user] = proxy;
     }
 

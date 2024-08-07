@@ -322,14 +322,15 @@ describe(`The Generates Allow List Mint - (Unseen v${process.env.VERSION})`, asy
 
     it('should not mint an allow list stage after exceeding max token supply', async () => {
       await setMaxSupply({ supply: 10 });
+      const parms = parameters;
       const { root, proof } = await createAllowListAndGetProof(
         [minter, alice],
-        parameters,
+        parms,
         0
       );
       const { proof: proofSecondMinter } = await createAllowListAndGetProof(
         [minter, alice],
-        parameters,
+        parms,
         1
       );
 

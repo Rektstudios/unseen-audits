@@ -40,7 +40,7 @@ contract UnseenRegistry is ProxyRegistry {
         if (_owner == address(0)) revert NewOwnerIsZeroAddress();
 
         AuthenticatedProxy impl = new AuthenticatedProxy();
-        impl.initialize(address(this), this, address(impl));
+        impl.initialize(address(this));
         impl.setRevoke(true);
         authProxyImplementation = address(impl);
 
