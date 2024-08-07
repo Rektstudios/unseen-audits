@@ -3,13 +3,13 @@ pragma solidity ^0.8.26;
 
 import { Ownable } from "solady/src/auth/Ownable.sol";
 import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
-import { ProxyRegistryInterface, AuthenticatedProxy } from "./ProxyRegistryInterface.sol";
+import { IProxyRegistry, AuthenticatedProxy } from "./IProxyRegistry.sol";
 
 /**
  * @title  ProxyRegistry
  * @author decapitator (0xdecapitator.eth)
  */
-contract ProxyRegistry is Ownable, ProxyRegistryInterface {
+contract ProxyRegistry is Ownable, IProxyRegistry {
     /* Proxy implementation contract. Must be initialized. */
     address public immutable override authProxyImplementation;
 

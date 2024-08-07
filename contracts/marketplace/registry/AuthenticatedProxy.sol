@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import { ProxyRegistry } from "./ProxyRegistry.sol";
+import { IProxyRegistry } from "./IProxyRegistry.sol";
 
 /**
  * @title  AuthenticatedProxy
@@ -17,7 +17,7 @@ contract AuthenticatedProxy {
     address public owner;
 
     /* Associated registry with contract authentication information. */
-    ProxyRegistry public immutable registry;
+    IProxyRegistry public immutable registry;
 
     /* Whether access has been revoked. */
     bool public revoked;
@@ -75,7 +75,7 @@ contract AuthenticatedProxy {
     }
 
     constructor() payable {
-        registry = ProxyRegistry(msg.sender);
+        registry = IProxyRegistry(msg.sender);
     }
 
     /**
