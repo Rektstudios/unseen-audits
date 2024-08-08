@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import { ProxyRegistry } from "./ProxyRegistry.sol";
+import { IProxyRegistry } from "./IProxyRegistry.sol";
 
 /**
  * @title  AuthenticatedProxy
@@ -17,13 +17,13 @@ contract AuthenticatedProxy {
     address public owner;
 
     /* Associated registry with contract authentication information. */
-    ProxyRegistry public registry;
+    IProxyRegistry public immutable registry;
 
     /* Whether access has been revoked. */
     bool public revoked;
 
     /// @notice The original address of the implementation.
-    address public implementation;
+    address public immutable implementation = address(this);
 
     /* Delegate call could be used to atomically transfer multiple assets owned by the proxy contract with one order. */
     enum HowToCall {
@@ -74,22 +74,19 @@ contract AuthenticatedProxy {
         _;
     }
 
+    constructor() payable {
+        registry = IProxyRegistry(msg.sender);
+    }
+
     /**
      * Initialize an AuthenticatedProxy
      *
      * @param addrOwner Address of user on whose behalf this proxy will act
-     * @param addrRegistry Address of ProxyRegistry contract which will manage this proxy
      */
-    function initialize(
-        address addrOwner,
-        ProxyRegistry addrRegistry,
-        address _originalImplementation
-    ) external {
+    function initialize(address addrOwner) external {
         if (initialized) revert AlreadyInitialized();
         initialized = true;
         owner = addrOwner;
-        registry = addrRegistry;
-        implementation = _originalImplementation;
     }
 
     /**

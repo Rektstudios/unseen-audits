@@ -5,7 +5,7 @@ import { Ownable } from "solady/src/auth/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import { AuthenticatedProxy } from "../registry/AuthenticatedProxy.sol";
-import { ProxyRegistryInterface } from "../registry/ProxyRegistryInterface.sol";
+import { IProxyRegistry } from "../registry/IProxyRegistry.sol";
 import { StaticCaller } from "../../lib/StaticCaller.sol";
 import { ERC1271 } from "../../lib/ERC1271.sol";
 import { ERC1271Mod } from "../../lib/ERC1271Mod.sol";
@@ -343,7 +343,7 @@ contract ExchangeCore is
     }
 
     function executeCall(
-        ProxyRegistryInterface registry,
+        IProxyRegistry registry,
         address maker,
         Call memory call
     ) internal returns (bool) {
@@ -486,7 +486,7 @@ contract ExchangeCore is
 
         if (
             !executeCall(
-                ProxyRegistryInterface(firstOrder.registry),
+                IProxyRegistry(firstOrder.registry),
                 firstOrder.executer,
                 firstCall
             )
@@ -497,7 +497,7 @@ contract ExchangeCore is
         /* Execute second call, assert success. */
         if (
             !executeCall(
-                ProxyRegistryInterface(secondOrder.registry),
+                IProxyRegistry(secondOrder.registry),
                 secondOrder.executer,
                 secondCall
             )

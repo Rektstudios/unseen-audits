@@ -176,6 +176,12 @@ describe(`Exchange Registry - (Unseen v${process.env.VERSION})`, async function 
   context('registry', function () {
     it('register a proxy for eoa', async function () {
       expect(await registerProxy(bob)).to.not.eq(ZERO_ADDRESS);
+      const { authProxy } = await getAuthenticatedProxy(bob);
+      expect(await authProxy.implementation()).to.eq(
+        await registry.authProxyImplementation()
+      );
+
+      expect(await authProxy.registry()).to.eq(registry.address);
     });
     it('register a proxy for mockERC1271', async function () {
       expect(await registerProxyFor(bob, mock1271.address)).to.not.eq(
@@ -234,14 +240,9 @@ describe(`Exchange Registry - (Unseen v${process.env.VERSION})`, async function 
     it('should not allow proxy reinitialization', async function () {
       const { authProxy } = await getAuthenticatedProxy(bob);
       await expect(
-        authProxy.initialize(
-          registry.address,
-          registry.address,
-          authProxy.address,
-          {
-            gasLimit: 100_000,
-          }
-        )
+        authProxy.initialize(alice.address, {
+          gasLimit: 100_000,
+        })
       ).to.be.revertedWithCustomError(authProxy, 'AlreadyInitialized');
     });
     it('allows proxy ownership transfer', async function () {
