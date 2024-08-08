@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import { ERC1271Mod } from "../lib/ERC1271Mod.sol";
 import { ArrayUtils } from "../lib/ArrayUtils.sol";
-import { ProxyRegistry } from "./registry/ProxyRegistry.sol";
+import { IProxyRegistry } from "./interfaces/IProxyRegistry.sol";
 
 /*
 
@@ -34,7 +34,7 @@ contract GlobalMaker is ERC1271Mod {
      * Construct a new GlobalMaker, creating the proxy it will require
      */
     constructor(
-        ProxyRegistry registry,
+        IProxyRegistry registry,
         bytes4[] memory functionSignatures,
         uint16[] memory makerOffsets
     ) payable {
