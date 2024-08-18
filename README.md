@@ -4,7 +4,7 @@
 <h1 align="center">Unseen Contracts</h1>
 <p align="center">
 <a href="https://github.com/Rektstudios/unseen-audits/actions"><img alt="Build Status" src="https://github.com/Rektstudios/unseen-audits/actions/workflows/tests.yml/badge.svg"/></a>
-<a href="https://discord.gg/playunseen"><img alt="Join our Discord!" src="https://img.shields.io/discord/834227967404146718.svg?color=7289da&label=discord&logo=discord&style=flat"/></a>
+<a href="https://discord.gg/playunseen"><img alt="Join our Discord!" src="https://img.shields.io/discord/.svg?color=7289da&label=discord&logo=discord&style=flat"/></a>
 </p>
 <p align="center"><strong>Collection of smart contracts powering Unseen platform</strong></p>
 
