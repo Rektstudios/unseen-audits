@@ -8,12 +8,14 @@ export const networkConfig: () => Promise<networkConfigType> = async () => {
         marketplace: {
           feesBps: 250,
         },
+        uncn: {
+          interchainTokenServiceAddress: '',
+          initialSupply: 1_000_000_000,
+        },
         multisigWallet: '',
         thegenerates: {
-          baseTokenUri:
-            'https://unseen-nft-staging.fra1.cdn.digitaloceanspaces.com/characters/metadata/',
-          contractUri:
-            'https://unseen-nft-staging.fra1.cdn.digitaloceanspaces.com/characters/contractUri/0.json',
+          baseTokenUri: 'https://example.com/characters/metadata/',
+          contractUri: 'https://example.com/characters/contractUri/0.json',
           signer: '',
           royaltiesBps: 500,
           rentFeesBps: 500,
@@ -31,10 +33,8 @@ export const networkConfig: () => Promise<networkConfigType> = async () => {
         },
         multisigWallet: '',
         thegenerates: {
-          baseTokenUri:
-            'https://unseen-nft-staging.fra1.cdn.digitaloceanspaces.com/characters/metadata/',
-          contractUri:
-            'https://unseen-nft-staging.fra1.cdn.digitaloceanspaces.com/characters/contractUri/0.json',
+          baseTokenUri: 'https://example.com/characters/metadata/',
+          contractUri: 'https://example.com/characters/contractUri/0.json',
           signer: '',
           royaltiesBps: 500,
           rentFeesBps: 500,
