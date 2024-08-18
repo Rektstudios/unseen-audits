@@ -3,11 +3,10 @@
 
 <h1 align="center">Unseen Contracts</h1>
 <p align="center">
-<a href="https://github.com/Rektstudios/unseen-audits/actions"><img alt="Build Status" src="https://github.com/Rektstudios/contracts/actions/workflows/tests.yml/badge.svg"/></a>
+<a href="https://github.com/Rektstudios/unseen-audits/actions"><img alt="Build Status" src="https://github.com/Rektstudios/unseen-audits/actions/workflows/tests.yml/badge.svg"/></a>
 <a href="https://discord.gg/playunseen"><img alt="Join our Discord!" src="https://img.shields.io/discord/834227967404146718.svg?color=7289da&label=discord&logo=discord&style=flat"/></a>
 </p>
 <p align="center"><strong>Collection of smart contracts powering Unseen platform</strong></p>
-<br />
 
 ## Installation
 
@@ -21,7 +20,7 @@ contracts
 |   |-- BaseFeeCollector: "Allows Native and ERC20 tokens withdrawal"
 |   |-- FeeCollector: "Contract that inherits the BaseFeeCollector"
 |
-|-- marketplae: "exchange contract that can trade any digital asset"
+|-- marketplace: "exchange contract that can trade any digital asset"
 |   |-- exchange: "contract to match orders"
 |   |-- registry: "authenticated proxies for traders"
 |   |-- static: "predicate functions used for validations"
