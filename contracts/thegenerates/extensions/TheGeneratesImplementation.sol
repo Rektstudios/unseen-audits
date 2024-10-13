@@ -376,8 +376,6 @@ contract TheGeneratesImplementation is ErrorsAndEvents {
      *      and end prices differ, the current price will be interpolated on
      *      a linear basis.
      *
-     *      Since this function is only used for consideration items, it will
-     *      round up.
      *
      * @param startTime  The starting time of the stage.
      * @param endTime    The end time of the stage.
@@ -497,8 +495,7 @@ contract TheGeneratesImplementation is ErrorsAndEvents {
     }
 
     /**
-     * @notice Derive the required consideration items for the mint,
-     *         includes the fee recipient and creator payout.
+     * @notice Process payment to Unseen payout.
      *
      * @param quantity     The number of tokens to mint.
      * @param currentPrice The current price of each token.
@@ -511,7 +508,7 @@ contract TheGeneratesImplementation is ErrorsAndEvents {
         // Put the total mint price on the stack.
         uint256 totalPrice = quantity * currentPrice;
 
-        // Put the creator payouts on the stack.
+        // Put the creator payout on the stack.
         TheGeneratesStorage.Layout storage layout = TheGeneratesStorage
             .layout();
 

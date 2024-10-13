@@ -86,7 +86,7 @@ interface ITheGenerates {
     function updateSigner(address signer) external;
 
     /**
-     * @notice Returns TheGenerates creator payouts.
+     * @notice Returns TheGenerates payout.
      */
     function getUnseenPayout()
         external

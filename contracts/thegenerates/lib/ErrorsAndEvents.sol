@@ -41,11 +41,6 @@ interface ErrorsAndEvents {
     );
 
     /**
-     * @dev Revert if the fee basis points is greater than 1_000.
-     */
-    error InvalidFeeBps(uint256 feeBps);
-
-    /**
      * @dev Revert if unseen payout address is the zero address.
      */
     error UnseenPayoutAddressCannotBeZeroAddress();
